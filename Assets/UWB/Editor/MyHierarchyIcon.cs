@@ -31,7 +31,6 @@ class MyHierarchyIcon
             // Example: mark all lights
             if (g.GetComponent<Light>() != null ||
                 g.GetComponent<Camera>() != null ||
-                g.GetComponent<HoloToolkit.Unity.SpatialMappingManager>() != null ||
                 g.GetComponent<UWBNetworkingPackage.NetworkManager>() != null ||
                 g.GetComponent<SpawnScript>() != null
                 )
