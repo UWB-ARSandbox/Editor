@@ -1,0 +1,3 @@
+[submodule "Assets/UWB/UWBNetworkingPackage-LW"]
+	path = Assets/UWB/UWBNetworkingPackage-LW
+	url = https://github.com/UWB-ARSandbox/UWBNetworkingPackage-LW
