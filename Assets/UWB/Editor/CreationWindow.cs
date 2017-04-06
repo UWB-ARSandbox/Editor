@@ -8,6 +8,10 @@ public class CreationWindow : EditorWindow
 {
     static bool physicalObject = false;
 
+	static List<string> names = new List<string>() { "Cube", "Sphere", "Capsule", "Cylinder", "Plane", "Quad",
+		"PhysicCube", "PhysicSphere", "PhysicCapsule", "PhysicCylinder", "PhysicPlane", "PhysicQuad", "Head",
+		"HandLeft", "HandRight", "LeftHand", "RightHand", "HoloHead", "ViveHead", "VirtualCamera"};
+
     // Add menu item named "My Window" to the Window menu
     [MenuItem("Window/[UWB] Creation Menu", false, 3)]
     public static void ShowWindow()
@@ -63,10 +67,18 @@ public class CreationWindow : EditorWindow
             string path = AssetDatabase.GUIDToAssetPath(guids[i]);
             string objName = path.Split('/').Last().Split('.').First(); // 17 for Assets/Resources/ and 7 for .prefab
             //string objName = path.Substring(17, path.Length - 24);
+			for(int j = 0; j < names.Count; j++)
+			{
+				if(objName == names[j])
+				{
+					goto skipButton;
+				}
+			}
             if(GUILayout.Button(objName))
             {
                 CreateObj(objName, path);
             }
+			skipButton: ;
         }
     }
 
