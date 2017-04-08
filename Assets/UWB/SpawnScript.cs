@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SpawnScript : MonoBehaviour
 {
-
+    public bool sendColor = false;
     bool sent = false;
     public string prefabName = "Cube";
 
@@ -46,5 +46,17 @@ public class SpawnScript : MonoBehaviour
         // Send to others, create info
         ExitGames.Client.Photon.Hashtable instantiateEvent = PhotonNetwork.networkingPeer.SendInstantiate(prefabName, transform.position, transform.rotation, 0, viewIDs, null, false);
         gameObject.SendMessage(PhotonNetworkingMessage.OnPhotonInstantiate.ToString(), new PhotonMessageInfo(PhotonNetwork.networkingPeer.LocalPlayer, (int)instantiateEvent[(byte)6], null), SendMessageOptions.DontRequireReceiver);
+
+        if (sendColor)
+        {
+            StartCoroutine(SendColor(views[0]));
+        }
+    }
+
+    IEnumerator SendColor(PhotonView pv)
+    {
+        yield return new WaitForSeconds(0.5f);
+        Color thisColor = gameObject.GetComponent<Renderer>().material.color;
+        pv.RPC("ChangeColor", PhotonTargets.All, thisColor.r, thisColor.g, thisColor.b);
     }
 }

@@ -66,21 +66,27 @@ public class CreationWindow : EditorWindow
         for(int i = 0; i < guids.Length; i++)
         {
             string path = AssetDatabase.GUIDToAssetPath(guids[i]);
-            string objName = path.Split('/').Last().Split('.').First();
+            string btnName = path.Split('/').Last().Split('.').First();
+            string objName = path.Substring(path.IndexOf('/', path.IndexOf('/') + 1) + 1);
+            if(objName.Equals(""))
+            {
+                objName = path.Split('/').Last();
+            }
+            objName = objName.Split('.').First();
 
-            if(objName.Length > 6 && objName.Substring(0, 6).Equals("Physic"))
+            if (btnName.Length > 6 && btnName.Substring(0, 6).Equals("Physic"))
             {
                 goto skipButton; // Essentially 'contiue'
             }
 			for(int j = 0; j < names.Count; j++)
 			{
-				if(objName == names[j])
+				if(btnName == names[j])
 				{
 					goto skipButton; // Cannot add 'contiue' properly for this, must be goto
 				}
 			}
 
-            if(GUILayout.Button(objName))
+            if(GUILayout.Button(btnName))
             {
                 CreateObj(objName, path);
             }
