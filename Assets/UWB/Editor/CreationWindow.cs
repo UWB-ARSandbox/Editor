@@ -84,7 +84,7 @@ public class CreationWindow : EditorWindow
             {
                 CreateObj(objName, path);
             }
-			skipButton: ;
+        skipButton: ;
         }
     }
 
@@ -134,6 +134,12 @@ public class CreationWindow : EditorWindow
     [MenuItem("GameObject/3D Object/Quad", false, 5)]
     public static void CreateQuad()
     {
+        if(physicalObject)
+        {
+            Debug.LogWarning("No avaliable collider for [Quad]; skipping creation");
+            return;
+        }
+
         GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
         InitBasicShape(quad, "Quad");
         // Quads have a different default spawn behavior
