@@ -16,7 +16,6 @@ public class SpawnScript : MonoBehaviour
             return;
 
         // If we're "fully" connected to a room
-        //if (PhotonNetwork.connectionStateDetailed == ClientState.ConnectedToGameserver && !PhotonNetwork.connecting)
         if ((PhotonNetwork.connectionStateDetailed == ClientState.ConnectedToGameserver || PhotonNetwork.connectionStateDetailed == ClientState.Joined) && !PhotonNetwork.connecting)
         {
             // Send this object after 2 seconds

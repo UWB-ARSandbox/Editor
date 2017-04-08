@@ -66,15 +66,20 @@ public class CreationWindow : EditorWindow
         for(int i = 0; i < guids.Length; i++)
         {
             string path = AssetDatabase.GUIDToAssetPath(guids[i]);
-            string objName = path.Split('/').Last().Split('.').First(); // 17 for Assets/Resources/ and 7 for .prefab
-            //string objName = path.Substring(17, path.Length - 24);
+            string objName = path.Split('/').Last().Split('.').First();
+
+            if(objName.Length > 6 && objName.Substring(0, 6).Equals("Physic"))
+            {
+                goto skipButton; // Essentially 'contiue'
+            }
 			for(int j = 0; j < names.Count; j++)
 			{
 				if(objName == names[j])
 				{
-					goto skipButton;
+					goto skipButton; // Cannot add 'contiue' properly for this, must be goto
 				}
 			}
+
             if(GUILayout.Button(objName))
             {
                 CreateObj(objName, path);
@@ -169,25 +174,35 @@ public class CreationWindow : EditorWindow
             spawnScript = obj.AddComponent<SpawnScript>();
         spawnScript.prefabName = prefabName; // Set our script's name
 
-        UWBPhotonTransformView objTview = obj.GetComponent<UWBPhotonTransformView>();
-        if(objTview == null)
-            objTview = obj.AddComponent<UWBPhotonTransformView>(); // Attatch this and a PhotonView
-        objTview.enableSyncPos(); // These are all off by default
-        objTview.enableSyncRot(); // 
-        objTview.enableSyncScale(); // 
-
-        PhotonView objPview = obj.GetComponent<PhotonView>();
-        objPview.ObservedComponents = new List<Component>(); // Make sure we're observing this object
-        objPview.ObservedComponents.Add(obj.GetComponent<Transform>());
-        objPview.synchronization = ViewSynchronization.UnreliableOnChange; // Default
-        objPview.ownershipTransfer = OwnershipOption.Takeover;
         if (physicalObject)
         {
-            if(obj.GetComponent<PhotonRigidbodyView>() == null)
-                obj.AddComponent<PhotonRigidbodyView>(); // Track velocities; rigidbody automatically added
+            if (obj.GetComponent<PhotonRigidbodyView>() == null)
+            {
+                obj.AddComponent<PhotonRigidbodyView>(); // Track velocities; rigidbody and photon view automatically added
+            }
             spawnScript.prefabName = "Physic" + prefabName; // Ensure the proper prefab name for client download
             obj.name = "Physic" + obj.name; // For convience, also change 
         }
+        else
+        {
+            UWBPhotonTransformView objTview = obj.GetComponent<UWBPhotonTransformView>();
+            if (objTview == null)
+                objTview = obj.AddComponent<UWBPhotonTransformView>(); // Attatch this and a PhotonView
+            objTview.enableSyncPos(); // These are all off by default
+            objTview.enableSyncRot(); // 
+            objTview.enableSyncScale(); //
+        }
+
+        PhotonView objPview = obj.GetComponent<PhotonView>();
+        objPview.ObservedComponents = new List<Component>(); // Make sure we're observing this object
+
+        if(physicalObject)
+            objPview.ObservedComponents.Add(obj.GetComponent<Rigidbody>());
+        else
+            objPview.ObservedComponents.Add(obj.GetComponent<Transform>());
+
+        objPview.synchronization = ViewSynchronization.UnreliableOnChange; // Default
+        objPview.ownershipTransfer = OwnershipOption.Takeover;
     }
 
     [MenuItem("GameObject/2D Object", false, 51)]
@@ -210,9 +225,18 @@ public class CreationWindow : EditorWindow
     // Get a position 5f in front of the center of the screen, and return that position
     private static Vector3 GetViewCenterWorldPos()
     {
-        Ray worldRay = SceneView.lastActiveSceneView.camera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 1.0f));
-        Vector3 worldPos = worldRay.GetPoint(5f);
-
+        Vector3 worldPos;
+        // When the Scene View is not active, this will fail-- defaults to 0,0,0 in that case
+        try
+        {
+            Ray worldRay = SceneView.lastActiveSceneView.camera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 1.0f));
+            worldPos = worldRay.GetPoint(5f);
+        }
+        catch
+        {
+            Debug.LogWarning("Creating objects without Scene window open will create them at (0, 0, 0)");
+            worldPos = new Vector3(0, 0, 0);
+        }
         return worldPos;
     }
 
