@@ -7,6 +7,7 @@ using System.Collections.Generic;
 public class CreationWindow : EditorWindow
 {
     static bool physicalObject = false;
+    static Material defaultMaterial = null;
 
 	static List<string> names = new List<string>() { "Cube", "Sphere", "Capsule", "Cylinder", "Plane", "Quad",
 		"PhysicCube", "PhysicSphere", "PhysicCapsule", "PhysicCylinder", "PhysicPlane", "PhysicQuad", "Head",
@@ -94,47 +95,61 @@ public class CreationWindow : EditorWindow
     public static void CreateCube()
     {
         GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        InitShape(cube, "Cube");
+        InitBasicShape(cube, "Cube");
     }
 
     [MenuItem("GameObject/3D Object/Sphere", false, 1)]
     public static void CreateSphere()
     {
         GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        InitShape(sphere, "Sphere");
+        InitBasicShape(sphere, "Sphere");
     }
 
     [MenuItem("GameObject/3D Object/Capsule", false, 2)]
     public static void CreateCapsule()
     {
         GameObject capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-        InitShape(capsule, "Capsule");
+        InitBasicShape(capsule, "Capsule");
     }
 
     [MenuItem("GameObject/3D Object/Cylinder", false, 3)]
     public static void CreateCylinder()
     {
         GameObject cylinder = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        InitShape(cylinder, "Cylinder");
+        InitBasicShape(cylinder, "Cylinder");
     }
 
     [MenuItem("GameObject/3D Object/Plane", false, 4)]
     public static void CreatePlane()
     {
         GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
-        InitShape(plane, "Plane");
+        InitBasicShape(plane, "Plane");
     }
 
     [MenuItem("GameObject/3D Object/Quad", false, 5)]
     public static void CreateQuad()
     {
         GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        InitShape(quad, "Quad");
+        InitBasicShape(quad, "Quad");
         // Quads have a different default spawn behavior
         quad.transform.LookAt(GetViewCenterWorldPos(0));
         quad.transform.Rotate(0, 180, 0);
     }
     #endregion
+
+    public static void InitBasicShape(GameObject obj, string prefabName)
+    {
+        obj.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+        Renderer objRenderer = obj.GetComponent<Renderer>();
+        if(defaultMaterial == null)
+        {
+            defaultMaterial = Resources.Load("SpawnedObjectMaterial") as Material;
+        }
+
+        objRenderer.material = defaultMaterial;
+
+        InitShape(obj, prefabName);
+    }
 
     // This method sets an object's shape to center, and attatches the proper script to it
     public static void InitShape(GameObject obj, string prefabName)
