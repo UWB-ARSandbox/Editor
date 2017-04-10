@@ -14,14 +14,13 @@ public class textchanger : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
-
+	void Update ()
+    {
 	}
 
-
-	public void changeText(string changeTMP){
-
-
+    [PunRPC]
+	public void changeText(string changeTMP)
+    {
 		textstring.text = changeTMP;
 
 	}
