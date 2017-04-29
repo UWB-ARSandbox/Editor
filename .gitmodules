@@ -1,6 +1,6 @@
-[submodule "Assets/UWB/UWBNetworkingPackage-LW"]
-	path = Assets/UWB/UWBNetworkingPackage-LW
-	url = https://github.com/UWB-ARSandbox/UWBNetworkingPackage-LW
 [submodule "Assets/Resources"]
 	path = Assets/Resources
 	url = https://github.com/UWB-ARSandbox/Resources
+[submodule "Assets/ASL"]
+	path = Assets/ASL
+	url = https://github.com/UWB-ARSandbox/ASL
