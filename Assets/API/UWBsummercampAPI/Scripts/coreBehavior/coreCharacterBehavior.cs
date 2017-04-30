@@ -20,6 +20,7 @@ public class coreCharacterBehavior : MonoBehaviour
     // Static Variables
     NavMeshAgent agent;
     AICharacterControl charControl;
+    PhotonView pV;
 
     // Dynamic Variables
     protected direction movingDirection = direction.forward;
@@ -30,6 +31,7 @@ public class coreCharacterBehavior : MonoBehaviour
     {
         agent = gameObject.GetComponent<NavMeshAgent>();
         charControl = gameObject.GetComponent<AICharacterControl>();
+        pV = transform.GetComponent<PhotonView>();
 
         MethodInfo method = this.GetType().GetMethod("buildGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
         if (method != null)
@@ -61,56 +63,68 @@ public class coreCharacterBehavior : MonoBehaviour
         }
         else
         {
-            charControl.SetTargetPos(transform.position + Vector3.forward );
+            // AICharacterControl.cs PunRPC
+            pV.RPC("SetTargetPos", PhotonTargets.All, transform.position + Vector3.forward);
         }
 
 	}
 
-
-
-
-
-	public bool makeSmaller( )
+    public bool makeSmaller( )
     {
-        CapsuleCollider m_Capsule = GetComponent<CapsuleCollider>();
         if (characterSize == sizes.small)
         {
 			return false;
 		}
-        else if (characterSize == sizes.normal)
+
+        // This file PunRPC
+        pV.RPC("makeSmallerRPC", PhotonTargets.All);
+
+        return true;
+	}
+
+    [PunRPC]
+    public void makeSmallerRPC()
+    {
+        CapsuleCollider m_Capsule = GetComponent<CapsuleCollider>();
+        if (characterSize == sizes.normal)
         {
-			transform.localScale = new Vector3(.3f, .3f, .3f);
-			characterSize = sizes.small;
+            transform.localScale = new Vector3(.3f, .3f, .3f);
+            characterSize = sizes.small;
             m_Capsule.height = m_Capsule.height / 3f;
             m_Capsule.center = m_Capsule.center / 3f;
 
         }
         else if (characterSize == sizes.big)
         {
-			transform.localScale  = new Vector3(1, 1, 1);
-			characterSize = sizes.normal;
+            transform.localScale = new Vector3(1, 1, 1);
+            characterSize = sizes.normal;
             m_Capsule.height = m_Capsule.height / 2f;
             m_Capsule.center = m_Capsule.center / 2f;
         }
+    }
 
-		return true;
-	}
+    public bool makeBigger()
+    {
 
-
-
-
-
-	public bool makeBigger( ){
-
-        CapsuleCollider m_Capsule = GetComponent<CapsuleCollider>();
         if (characterSize == sizes.big)
         {
-			return false;
-		}
-        else if (characterSize == sizes.normal)
+            return false;
+        }
+
+        // This file PunRPC
+        pV.RPC("makeBiggerRPC", PhotonTargets.All);
+
+        return true;
+    }
+
+    [PunRPC]
+    public void makeBiggerRPC()
+    {
+        CapsuleCollider m_Capsule = GetComponent<CapsuleCollider>();
+        if (characterSize == sizes.normal)
         {
-			transform.localScale = new Vector3(2, 2, 2);
-			characterSize = sizes.big;
+            transform.localScale = new Vector3(2, 2, 2);
+            characterSize = sizes.big;
 
             m_Capsule.height = m_Capsule.height * 2f;
             m_Capsule.center = m_Capsule.center * 2f;
@@ -118,15 +132,13 @@ public class coreCharacterBehavior : MonoBehaviour
         }
         else if (characterSize == sizes.small)
         {
-			transform.localScale= new Vector3(1, 1, 1);
-			characterSize = sizes.normal;
+            transform.localScale = new Vector3(1, 1, 1);
+            characterSize = sizes.normal;
 
             m_Capsule.height = m_Capsule.height * 3f;
             m_Capsule.center = m_Capsule.center * 3f;
         }
-
-		return true;
-	}
+    }
 
     public bool isMoving()
     {
@@ -142,19 +154,24 @@ public class coreCharacterBehavior : MonoBehaviour
         }
         else
         {
-            charControl.jumpFlag = true;
-            Vector3 directiton = (charControl.target.position - transform.position).normalized;
-            directiton.y = 0;
-            charControl.target.position = transform.position + directiton*forceTMP;
-            StartCoroutine(Parabola(GetComponent<NavMeshAgent>(), forceTMP/3f, forceTMP/6f));
+            pV.RPC("jumpAgent", PhotonTargets.All, forceTMP); // This file PunRPC
         }
+    }
+
+    [PunRPC]
+    private void jumpAgent(int forceTMP)
+    {
+        isJumpingFlag = true;
+        charControl.jumpFlag = true;
+        Vector3 directiton = (charControl.target.position - transform.position).normalized;
+        directiton.y = 0;
+        charControl.target.position = transform.position + directiton * forceTMP;
+        StartCoroutine(Parabola(GetComponent<NavMeshAgent>(), forceTMP / 3f, forceTMP / 6f));
     }
 
     // Method for jumpping in a 'parabola' motion, using a NavMeshAgent
     IEnumerator Parabola(NavMeshAgent agent, float height, float duration)
     {
-        //OffMeshLinkData data = agent.currentOffMeshLinkData;
-        AICharacterControl charControl = gameObject.GetComponent<AICharacterControl>();
         Vector3 startPos = agent.transform.position;
         Vector3 endPos = charControl.target.position + Vector3.up * agent.baseOffset;
         float normalizedTime = 0.0f;
@@ -165,8 +182,9 @@ public class coreCharacterBehavior : MonoBehaviour
             normalizedTime += Time.deltaTime / duration;
             yield return null;
         }
-        //AICharacterControl charControl = gameObject.GetComponent<AICharacterControl>();
+
         charControl.jumpFlag = false;
+        isJumpingFlag = false;
     }
 
     public bool isJumping()
@@ -183,7 +201,7 @@ public class coreCharacterBehavior : MonoBehaviour
         else
         {
             isCrouchingFlag = !isCrouchingFlag;
-            charControl.crouchFlag = isCrouchingFlag;
+            pV.RPC("SetCrouching", PhotonTargets.All, isCrouchingFlag); // AICharacterControl.cs PunRPC
         }
     }
 

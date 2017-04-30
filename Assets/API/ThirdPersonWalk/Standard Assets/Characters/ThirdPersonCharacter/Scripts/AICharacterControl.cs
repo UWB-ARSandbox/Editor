@@ -71,5 +71,11 @@ namespace UnityStandardAssets.Characters.ThirdPerson
                 this.SetTarget(newTarget.transform);
             }
         }
+
+        [PunRPC]
+        public void SetCrouching(bool crouch)
+        {
+            crouchFlag = crouch;
+        }
     }
 }
