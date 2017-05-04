@@ -14,10 +14,6 @@ public class test : coreCharacterBehavior {
     // Update is called once per frame
     void updateGame()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            crouch();
-        }
-        //moveForward ();
+        moveForward ();
     }
 }
