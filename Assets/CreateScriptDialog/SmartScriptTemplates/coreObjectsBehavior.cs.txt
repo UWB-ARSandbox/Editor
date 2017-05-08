@@ -1,0 +1,7 @@
+BASECLASS=coreObjectsBehavior
+using UnityEngine;
+
+public class $ClassName : coreObjectsBehavior {
+	
+	$Functions
+}

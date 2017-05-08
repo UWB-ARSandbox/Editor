@@ -1,4 +1,4 @@
-﻿//C# Example
+﻿using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -6,10 +6,20 @@ using System.Collections.Generic;
 
 public class CreationWindow : EditorWindow
 {
+    static GameObject selectedObject;
+    MonoBehaviour selectedScript;
+	string scriptTypeLabel;
+
+    bool objectFold = true;
+    bool scriptFold = true;
+    bool createSettingsFold = true;
+    bool primitiveObjFold = true;
+    bool customObjFold = true;
+
     static bool physicalObject = false;
     static Material defaultMaterial = null;
 
-	static List<string> names = new List<string>() { "Cube", "Sphere", "Capsule", "Cylinder", "Plane", "Quad",
+	static List<string> ignoreNames = new List<string>() { "Cube", "Sphere", "Capsule", "Cylinder", "Plane", "Quad",
 		"PhysicCube", "PhysicSphere", "PhysicCapsule", "PhysicCylinder", "PhysicPlane", "PhysicQuad", "Head",
 		"HandLeft", "HandRight", "LeftHand", "RightHand", "HoloHead", "ViveHead", "VirtualCamera"};
 
@@ -21,76 +31,178 @@ public class CreationWindow : EditorWindow
         EditorWindow.GetWindow(typeof(CreationWindow));
     }
 
+    void OnInspectorUpdate()
+    {
+        this.Repaint();
+    }
+
     void OnGUI()
     {
-        GUILayout.Label("Object Settings", EditorStyles.boldLabel);
-        physicalObject = EditorGUILayout.Toggle("Enable Physics", physicalObject);
+        /* Selected Object stats */
+        if (Selection.activeGameObject)
+        {
+            selectedObject = Selection.activeGameObject;
+			selectedScript = null;
+			scriptTypeLabel = "Object";
+
+			MonoBehaviour [] scriptsOnObject = selectedObject.GetComponents<coreObjectsBehavior>();
+			if (scriptsOnObject.Length == 0)
+			{
+				scriptsOnObject = selectedObject.GetComponents<coreCharacterBehavior> ();
+
+				if (scriptsOnObject.Length != 0)
+				{
+					selectedScript = scriptsOnObject [0];
+					scriptTypeLabel = "Player";
+				} 
+			}
+			else
+			{
+				selectedScript = scriptsOnObject [0];
+			}
+        }
+        else
+        {
+            selectedObject = null;
+            selectedScript = null;
+        }
+
+        objectFold = EditorGUILayout.InspectorTitlebar(objectFold, selectedObject);
+        if (objectFold)
+        {
+            // Object GUI stuff here
+            GUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.Space();
+            if (selectedObject != null)
+            {
+				selectedObject.name = EditorGUILayout.TextField(scriptTypeLabel + " Name", selectedObject.name, EditorStyles.objectField);
+            }
+            EditorGUILayout.Space();
+            GUILayout.EndVertical();
+        }
+
+        EditorGUILayout.Space();
+
+        scriptFold = EditorGUILayout.InspectorTitlebar(scriptFold, selectedScript);
+        if(scriptFold)
+        {
+            // Script GUI stuff here
+            GUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.Space();
+
+            if(selectedScript == null && selectedObject != null)
+            {
+                if(GUILayout.Button("Create Script"))
+                {
+                    NewScriptWindow.Init(selectedObject);
+                }
+            }
+            else if(selectedScript != null)
+            {
+				GUILayout.BeginHorizontal();
+				GUILayout.Label (scriptTypeLabel + " Script");
+				if(GUILayout.Button("Open Script"))
+                {
+					OpenComponentInMonoDevelop(selectedScript, 1);
+                }
+				GUILayout.EndHorizontal ();
+            }
+
+            EditorGUILayout.Space();
+            GUILayout.EndVertical();
+        }
+
+        EditorGUILayout.Space();
+		EditorGUILayout.Space();
+		EditorGUILayout.Space();
+
+        /* Creation Menu */
+        createSettingsFold = EditorGUILayout.Foldout(createSettingsFold, "Creation Settings", true);
+        if (createSettingsFold)
+        {
+            GUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.Space();
+            physicalObject = EditorGUILayout.Toggle("Enable Physics", physicalObject);
+            EditorGUILayout.Space();
+            GUILayout.EndVertical();
+        }
+        EditorGUILayout.Space();
 
         /* Each Primitive Object requires it's own special method */
+		primitiveObjFold = EditorGUILayout.Foldout(primitiveObjFold, "Primitive Objects", true);
+        if (primitiveObjFold)
+        {
+            GUILayout.BeginVertical(EditorStyles.helpBox);
 
-        GUILayout.Label("Primitive Objects", EditorStyles.boldLabel);
+            if (GUILayout.Button("Cube"))
+            {
+                CreateCube();
+            }
+            else if (GUILayout.Button("Sphere"))
+            {
+                CreateSphere();
+            }
+            else if (GUILayout.Button("Capsule"))
+            {
+                CreateCapsule();
+            }
+            else if (GUILayout.Button("Cylinder"))
+            {
+                CreateCylinder();
+            }
+            else if (GUILayout.Button("Plane"))
+            {
+                CreatePlane();
+            }
+            else if (GUILayout.Button("Quad"))
+            {
+                CreateQuad();
+            }
+            GUILayout.EndVertical();
+        }
 
-        if (GUILayout.Button("Cube"))
-        {
-            CreateCube();
-        }
-        else if(GUILayout.Button("Sphere"))
-        {
-            CreateSphere();
-        }
-        else if(GUILayout.Button("Capsule"))
-        {
-            CreateCapsule();
-        }
-        else if(GUILayout.Button("Cylinder"))
-        {
-            CreateCylinder();
-        }
-        else if(GUILayout.Button("Plane"))
-        {
-            CreatePlane();
-        }
-        else if (GUILayout.Button("Quad"))
-        {
-            CreateQuad();
-        }
+		EditorGUILayout.Space();
 
         /* Load Custom Objects */
-
-        GUILayout.Label("Custom Objects", EditorStyles.boldLabel);
-
-        string[] searchFolders = new string[1];
-        searchFolders[0] = "Assets/Resources";
-        string[] guids = AssetDatabase.FindAssets("t:Prefab",searchFolders);
-
-        for(int i = 0; i < guids.Length; i++)
+		customObjFold = EditorGUILayout.Foldout(customObjFold, "Custom Objects", true);
+        if (customObjFold)
         {
-            string path = AssetDatabase.GUIDToAssetPath(guids[i]);
-            string btnName = path.Split('/').Last().Split('.').First();
-            string objName = path.Substring(path.IndexOf('/', path.IndexOf('/') + 1) + 1);
-            if(objName.Equals(""))
-            {
-                objName = path.Split('/').Last();
-            }
-            objName = objName.Split('.').First();
+            GUILayout.BeginVertical(EditorStyles.helpBox);
 
-            if (btnName.Length > 6 && btnName.Substring(0, 6).Equals("Physic"))
-            {
-                goto skipButton; // Essentially 'contiue'
-            }
-			for(int j = 0; j < names.Count; j++)
-			{
-				if(btnName == names[j])
-				{
-					goto skipButton; // Cannot add 'contiue' properly for this, must be goto
-				}
-			}
+            string[] searchFolders = new string[1];
+            searchFolders[0] = "Assets/Resources";
+            string[] guids = AssetDatabase.FindAssets("t:Prefab", searchFolders);
 
-            if(GUILayout.Button(btnName))
+            for (int i = 0; i < guids.Length; i++)
             {
-                CreateObj(objName, path);
+                string path = AssetDatabase.GUIDToAssetPath(guids[i]);
+                string btnName = path.Split('/').Last().Split('.').First();
+                string objName = path.Substring(path.IndexOf('/', path.IndexOf('/') + 1) + 1);
+                if (objName.Equals(""))
+                {
+                    objName = path.Split('/').Last();
+                }
+                objName = objName.Split('.').First();
+
+                if (btnName.Length > 6 && btnName.Substring(0, 6).Equals("Physic"))
+                {
+                    goto skipButton; // Essentially 'contiue'
+                }
+                for (int j = 0; j < ignoreNames.Count; j++)
+                {
+                    if (btnName == ignoreNames[j])
+                    {
+                        goto skipButton; // Cannot add 'contiue' properly for this, must be goto
+                    }
+                }
+
+                if (GUILayout.Button(btnName))
+                {
+                    CreateObj(objName, path);
+                }
+                skipButton:;
             }
-        skipButton: ;
+            GUILayout.EndVertical();
         }
     }
 
@@ -260,4 +372,39 @@ public class CreationWindow : EditorWindow
 
         return worldPos;
     }
+
+	// DEPRECATED
+	// Open any given script in VisualStudio
+	public static void OpenComponentInVisualStudioIDE(MonoBehaviour component, int gotoLine)
+	{
+
+		string[] fileNames = Directory.GetFiles(Application.dataPath, component.GetType().ToString() + ".cs", SearchOption.AllDirectories);
+		if (fileNames.Length > 0)
+		{
+			string finalFileName = Path.GetFullPath(fileNames[0]);
+			//Debug.Log("File Found:" + fileNames[0] + ". Converting forward slashes: to backslashes" + finalFileName );
+			System.Diagnostics.Process.Start("devenv", " /edit \"" + finalFileName + "\" /command \"edit.goto " + gotoLine.ToString() + " \" ");
+		} 
+		else 
+		{
+			Debug.LogError("Error in [OpenComponentInVisualStudioIDE()]: File Not Found:" + component.GetType().ToString() + ".cs");
+		}
+	}
+
+	// Open any given script in MonoDevelop (or the default IDE)
+	public static void OpenComponentInMonoDevelop(MonoBehaviour component, int gotoLine)
+	{
+
+		string[] fileNames = Directory.GetFiles(Application.dataPath, component.GetType().ToString() + ".cs", SearchOption.AllDirectories);
+
+		if (fileNames.Length > 0)
+		{
+			string relativepath =  "Assets" + fileNames[0].Substring(Application.dataPath.Length);
+			AssetDatabase.OpenAsset(AssetDatabase.LoadAssetAtPath<TextAsset>(relativepath) as TextAsset, 1);
+		} 
+		else 
+		{
+			Debug.LogError("Error in [OpenComponentInMonoDevelop()]: File Not Found:" + component.GetType().ToString() + ".cs");
+		}
+	}
 }
