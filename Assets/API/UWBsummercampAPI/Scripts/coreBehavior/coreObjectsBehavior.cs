@@ -8,8 +8,13 @@ public class coreObjectsBehavior : MonoBehaviour {
 	protected bool playerIsTouchingFlag = false;
 	protected bool touched = false;
 	private GameObject iteractionObj = null;
-	// Use this for initialization
+    private Color netColor;
 
+    // Use this for initialization
+    private void Awake()
+    {
+        netColor = this.gameObject.GetComponent<Renderer>().material.color;
+    }
 
     protected bool playerIsTouching()
     {
@@ -177,4 +182,15 @@ public class coreObjectsBehavior : MonoBehaviour {
 	}
 
 
+    [PunRPC]
+    public void ChangeColor(float r, float g, float b)
+    {
+        if (this.gameObject.GetComponent<Renderer>() == null)
+        {
+            Debug.LogWarning("RPC [ChangeColor] called on object with no Renderer");
+            return;
+        }
+
+        this.gameObject.GetComponent<Renderer>().material.color = new Color(r, g, b);
+    }
 }
