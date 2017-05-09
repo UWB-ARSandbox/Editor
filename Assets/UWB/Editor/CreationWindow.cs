@@ -3,22 +3,35 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
+using UWBNetworkingPackage;
 
 public class CreationWindow : EditorWindow
 {
+    // Active Object
     static GameObject selectedObject;
     MonoBehaviour selectedScript;
 	string scriptTypeLabel;
 
+    // Network Variables
+    NetworkManager netManager;
+
+    // Folding sections
     bool objectFold = true;
     bool scriptFold = true;
+    bool networkFold = true;
     bool createSettingsFold = true;
     bool primitiveObjFold = true;
     bool customObjFold = true;
 
+    // GUI Specific variables
+    string networkStatus;
+    GUIStyle networkStatusStyle;
+
+    // Specific Creation Settings
     static bool physicalObject = false;
     static Material defaultMaterial = null;
 
+    // Prefabs to ignore in Custom Objects button population
 	static List<string> ignoreNames = new List<string>() { "Cube", "Sphere", "Capsule", "Cylinder", "Plane", "Quad",
 		"PhysicCube", "PhysicSphere", "PhysicCapsule", "PhysicCylinder", "PhysicPlane", "PhysicQuad", "Head",
 		"HandLeft", "HandRight", "LeftHand", "RightHand", "HoloHead", "ViveHead", "VirtualCamera"};
@@ -31,6 +44,32 @@ public class CreationWindow : EditorWindow
         EditorWindow.GetWindow(typeof(CreationWindow));
     }
 
+    // Use this function in place of Start()
+    void OnEnable()
+    {
+        networkStatus = "...";
+        networkStatusStyle = new GUIStyle();
+        networkStatusStyle.fontStyle = FontStyle.Bold;
+        networkStatusStyle.normal.textColor = Color.black;
+
+        GameObject netManObj = GameObject.Find("NetworkManager");
+        if(netManObj != null)
+        {
+            netManager = netManObj.GetComponent<NetworkManager>();
+        }
+
+        if (netManager != null)
+        {
+            networkStatus = "Ready to Connect!";
+            networkStatusStyle.normal.textColor = Color.green;
+        }
+        else
+        {
+            networkStatus = "Network Manager missing..";
+            networkStatusStyle.normal.textColor = Color.red;
+        }
+    }
+
     void OnInspectorUpdate()
     {
         this.Repaint();
@@ -38,7 +77,7 @@ public class CreationWindow : EditorWindow
 
     void OnGUI()
     {
-        /* Selected Object stats */
+        #region Selected Object stats
         if (Selection.activeGameObject)
         {
             selectedObject = Selection.activeGameObject;
@@ -66,7 +105,9 @@ public class CreationWindow : EditorWindow
             selectedObject = null;
             selectedScript = null;
         }
+        #endregion
 
+        #region Object Menu
         objectFold = EditorGUILayout.InspectorTitlebar(objectFold, selectedObject);
         if (objectFold)
         {
@@ -80,9 +121,11 @@ public class CreationWindow : EditorWindow
             EditorGUILayout.Space();
             GUILayout.EndVertical();
         }
+        #endregion
 
         EditorGUILayout.Space();
 
+        #region Script Menu
         scriptFold = EditorGUILayout.InspectorTitlebar(scriptFold, selectedScript);
         if(scriptFold)
         {
@@ -111,27 +154,58 @@ public class CreationWindow : EditorWindow
             EditorGUILayout.Space();
             GUILayout.EndVertical();
         }
+        #endregion
 
         EditorGUILayout.Space();
 		EditorGUILayout.Space();
 		EditorGUILayout.Space();
 
-        /* Creation Menu */
+        #region Network Menu
+        networkFold = EditorGUILayout.Foldout(networkFold, "Network", true);
+        if (networkFold)
+        {
+            GUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.Space();
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Network Status ");
+            EditorGUILayout.LabelField(networkStatus, networkStatusStyle);
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Server ");
+            netManager.MasterClient = EditorGUILayout.Toggle(netManager.MasterClient);
+            EditorGUILayout.EndHorizontal();
+            netManager.RoomName = EditorGUILayout.TextField("Room Name", netManager.RoomName, EditorStyles.objectField);
+            EditorGUILayout.Space();
+            GUILayout.EndVertical();
+        }
+        #endregion
+
+        EditorGUILayout.Space();
+        EditorGUILayout.Space();
+        EditorGUILayout.Space();
+
+        #region Creation Menu
         createSettingsFold = EditorGUILayout.Foldout(createSettingsFold, "Creation Settings", true);
         if (createSettingsFold)
         {
             GUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.Space();
-            physicalObject = EditorGUILayout.Toggle("Enable Physics", physicalObject);
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Enable Physics");
+            physicalObject = EditorGUILayout.Toggle(physicalObject);
+            GUILayout.EndHorizontal();
             EditorGUILayout.Space();
             GUILayout.EndVertical();
         }
+        #endregion
+
         EditorGUILayout.Space();
 
-        /* Each Primitive Object requires it's own special method */
-		primitiveObjFold = EditorGUILayout.Foldout(primitiveObjFold, "Primitive Objects", true);
+        #region Primitive Object Menu
+        primitiveObjFold = EditorGUILayout.Foldout(primitiveObjFold, "Primitive Objects", true);
         if (primitiveObjFold)
         {
+            // Each Primitive Object requires it's own special method
             GUILayout.BeginVertical(EditorStyles.helpBox);
 
             if (GUILayout.Button("Cube"))
@@ -160,11 +234,12 @@ public class CreationWindow : EditorWindow
             }
             GUILayout.EndVertical();
         }
+        #endregion
 
-		EditorGUILayout.Space();
+        EditorGUILayout.Space();
 
-        /* Load Custom Objects */
-		customObjFold = EditorGUILayout.Foldout(customObjFold, "Custom Objects", true);
+        #region Custom Objects Menu
+        customObjFold = EditorGUILayout.Foldout(customObjFold, "Custom Objects", true);
         if (customObjFold)
         {
             GUILayout.BeginVertical(EditorStyles.helpBox);
@@ -204,6 +279,7 @@ public class CreationWindow : EditorWindow
             }
             GUILayout.EndVertical();
         }
+        #endregion
     }
 
     public static void CreateObj(string objName, string path)
@@ -372,24 +448,6 @@ public class CreationWindow : EditorWindow
 
         return worldPos;
     }
-
-	// DEPRECATED
-	// Open any given script in VisualStudio
-	public static void OpenComponentInVisualStudioIDE(MonoBehaviour component, int gotoLine)
-	{
-
-		string[] fileNames = Directory.GetFiles(Application.dataPath, component.GetType().ToString() + ".cs", SearchOption.AllDirectories);
-		if (fileNames.Length > 0)
-		{
-			string finalFileName = Path.GetFullPath(fileNames[0]);
-			//Debug.Log("File Found:" + fileNames[0] + ". Converting forward slashes: to backslashes" + finalFileName );
-			System.Diagnostics.Process.Start("devenv", " /edit \"" + finalFileName + "\" /command \"edit.goto " + gotoLine.ToString() + " \" ");
-		} 
-		else 
-		{
-			Debug.LogError("Error in [OpenComponentInVisualStudioIDE()]: File Not Found:" + component.GetType().ToString() + ".cs");
-		}
-	}
 
 	// Open any given script in MonoDevelop (or the default IDE)
 	public static void OpenComponentInMonoDevelop(MonoBehaviour component, int gotoLine)
