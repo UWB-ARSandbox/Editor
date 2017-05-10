@@ -4,28 +4,42 @@ using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
 using UWBNetworkingPackage;
+using UnityEngine.SceneManagement;
+using UnityEditor.SceneManagement;
 
+[InitializeOnLoad]
 public class CreationWindow : EditorWindow
 {
     // Active Object
     static GameObject selectedObject;
-    MonoBehaviour selectedScript;
-	string scriptTypeLabel;
+    static MonoBehaviour selectedScript;
+    static string scriptTypeLabel;
+
+    // Active Scene
+    static Scene selectedScene;
+    static int selectedSceneIdx;
+    static int newSceneIdx;
+    static string scenePath = "API/UWBsummercampAPI/Scenes/";
+    static string[] sceneNames;// = new string[] { "1DemoScene", "2DemoScene", "3DemoSceneSmallBig" };
 
     // Network Variables
-    NetworkManager netManager;
+    static NetworkManager netManager;
+    static string roomName;
+    static bool isServer;
 
     // Folding sections
-    bool objectFold = true;
-    bool scriptFold = true;
-    bool networkFold = true;
-    bool createSettingsFold = true;
-    bool primitiveObjFold = true;
-    bool customObjFold = true;
+    static bool objectFold = true;
+    static bool scriptFold = true;
+    static bool levelFold = true;
+    static bool networkFold = true;
+    static bool createSettingsFold = true;
+    static bool primitiveObjFold = true;
+    static bool customObjFold = true;
 
     // GUI Specific variables
-    string networkStatus;
-    GUIStyle networkStatusStyle;
+    static string networkStatus;
+    static GUIStyle networkStatusStyle;
+    static Vector2 scrollPane;
 
     // Specific Creation Settings
     static bool physicalObject = false;
@@ -44,39 +58,153 @@ public class CreationWindow : EditorWindow
         EditorWindow.GetWindow(typeof(CreationWindow));
     }
 
-    // Use this function in place of Start()
-    void OnEnable()
+    // Called once, when the window is first opened
+    void Awake()
     {
-        networkStatus = "...";
         networkStatusStyle = new GUIStyle();
         networkStatusStyle.fontStyle = FontStyle.Bold;
         networkStatusStyle.normal.textColor = Color.black;
 
-        GameObject netManObj = GameObject.Find("NetworkManager");
-        if(netManObj != null)
+        RefreshNetworkManager();
+
+        selectedScene = EditorSceneManager.GetActiveScene();
+
+        RefreshSceneNames();
+    }
+
+    // This happens more than once, including when the play button is pressed but 
+    //  just before the game is actually playing via Application.isPlaying()
+    private void OnEnable()
+    {
+        Awake();
+    }
+
+    void RefreshNetworkManager()
+    {
+        // If we've changed our network manager's settings
+        if (netManager != null && (!netManager.RoomName.Equals(roomName) || netManager.MasterClient != isServer))
         {
-            netManager = netManObj.GetComponent<NetworkManager>();
+            netManager.RoomName = roomName;
+            netManager.MasterClient = isServer;
+            EditorUtility.SetDirty(netManager); // Fairly expensive operation
+        }
+        else // Find our network manager component in the scene
+        {
+            GameObject netManObj = GameObject.Find("NetworkManager");
+            if (netManObj != null)
+            {
+                netManager = netManObj.GetComponent<NetworkManager>();
+                roomName = netManager.RoomName;
+                isServer = netManager.MasterClient;
+            }
+            else
+            {
+                roomName = "<N/A>";
+                isServer = false;
+            }
+        }
+        RefreshNetworkConnection();
+    }
+
+    void RefreshNetworkConnection()
+    {
+        // Determine our connection status 
+        // (Ready, Unable, Loading, Connecting, Connected, Disconnected)
+        networkStatus = "...";
+
+        if(netManager == null)
+        {
+            networkStatus = "Network Manager missing..";
+            networkStatusStyle.normal.textColor = Color.red;
+            return;
         }
 
-        if (netManager != null)
+        if (Application.isPlaying)
+        {
+            switch(PhotonNetwork.connectionState)
+            {
+                case ConnectionState.InitializingApplication:
+                    networkStatus = "Loading..";
+                    networkStatusStyle.normal.textColor = Color.blue;
+                    break;
+                case ConnectionState.Connecting:
+                    networkStatus = "Connecting..";
+                    networkStatusStyle.normal.textColor = Color.blue;
+                    break;
+                case ConnectionState.Connected:
+                    if (PhotonNetwork.connectionStateDetailed == ClientState.Joined)
+                    {
+                        networkStatus = "Connected";
+                        networkStatusStyle.normal.textColor = Color.green;
+                    }
+                    else
+                    {
+                        networkStatus = "Connecting..";
+                        networkStatusStyle.normal.textColor = Color.blue;
+                    }
+                    break;
+                case ConnectionState.Disconnecting:
+                    networkStatus = "Disconnecting..";
+                    networkStatusStyle.normal.textColor = Color.red;
+                    break;
+                case ConnectionState.Disconnected:
+                    networkStatus = "Disconnected..";
+                    networkStatusStyle.normal.textColor = Color.red;
+                    break;
+            }
+        }
+        else
         {
             networkStatus = "Ready to Connect!";
             networkStatusStyle.normal.textColor = Color.green;
         }
-        else
+    }
+
+    void ChangeScene()
+    {
+        // newScene is a global static variable to prevent
+        //  reinstantiation every frame
+        selectedSceneIdx = newSceneIdx;
+
+        // If changes the the scene have been made, save them
+        if(selectedScene.isDirty)
+            EditorSceneManager.SaveScene(selectedScene);
+
+        selectedScene = EditorSceneManager.OpenScene(Application.dataPath + "/" + scenePath + sceneNames[selectedSceneIdx] + ".unity");
+    }
+
+    void RefreshSceneNames()
+    {
+        string[] searchFolders = new string[1];
+        searchFolders[0] = "Assets/" + scenePath.TrimEnd('/');
+        string[] guids = AssetDatabase.FindAssets("t:Scene", searchFolders);
+
+        sceneNames = new string[guids.Length];
+
+        for (int i = 0; i < guids.Length; i++)
         {
-            networkStatus = "Network Manager missing..";
-            networkStatusStyle.normal.textColor = Color.red;
+            string path = AssetDatabase.GUIDToAssetPath(guids[i]);
+            string sceneName = path.Split('/').Last().Split('.').First();
+            sceneNames[i] = sceneName;
         }
     }
 
+    // This ensures the menu will update whenever an object
+    //  would normally update. This means that object names
+    //  and scripts update properly.
     void OnInspectorUpdate()
     {
         this.Repaint();
     }
 
+    // This describes the look of the window, as well as the
+    //  functionality of all of the components, such as what
+    //  a particular button does.
     void OnGUI()
     {
+        // Allows the entire menu to be scrollable if too small
+        scrollPane = GUILayout.BeginScrollView(scrollPane);
+
         #region Selected Object stats
         if (Selection.activeGameObject)
         {
@@ -160,28 +288,50 @@ public class CreationWindow : EditorWindow
 		EditorGUILayout.Space();
 		EditorGUILayout.Space();
 
-        #region Network Menu
-        networkFold = EditorGUILayout.Foldout(networkFold, "Network", true);
-        if (networkFold)
+        #region Level Menu
+        levelFold = EditorGUILayout.Foldout(levelFold, "Level Selection", true);
+        if (levelFold)
         {
             GUILayout.BeginVertical(EditorStyles.helpBox);
-            EditorGUILayout.Space();
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Network Status ");
-            EditorGUILayout.LabelField(networkStatus, networkStatusStyle);
-            EditorGUILayout.EndHorizontal();
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Server ");
-            netManager.MasterClient = EditorGUILayout.Toggle(netManager.MasterClient);
-            EditorGUILayout.EndHorizontal();
-            netManager.RoomName = EditorGUILayout.TextField("Room Name", netManager.RoomName, EditorStyles.objectField);
+            newSceneIdx = EditorGUILayout.Popup("Level Selection", selectedSceneIdx, sceneNames);
+            if(newSceneIdx != selectedSceneIdx)
+            {
+                ChangeScene();
+            }
             EditorGUILayout.Space();
             GUILayout.EndVertical();
         }
         #endregion
 
         EditorGUILayout.Space();
-        EditorGUILayout.Space();
+
+        #region Network Menu
+        networkFold = EditorGUILayout.Foldout(networkFold, "Network", true);
+        if (networkFold)
+        {
+            GUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.Space();
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Network Status ");
+            EditorGUILayout.LabelField(networkStatus, networkStatusStyle);
+            GUILayout.EndHorizontal();
+
+            RefreshNetworkConnection();
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Server ");
+            isServer = EditorGUILayout.Toggle(isServer);
+            GUILayout.EndHorizontal();
+            roomName = EditorGUILayout.TextField("Room Name", roomName, EditorStyles.objectField);
+
+            // Update Network manager settings
+            //  OR find our network manager
+            RefreshNetworkManager();
+
+            EditorGUILayout.Space();
+            GUILayout.EndVertical();
+        }
+        #endregion
+
         EditorGUILayout.Space();
 
         #region Creation Menu
@@ -280,6 +430,8 @@ public class CreationWindow : EditorWindow
             GUILayout.EndVertical();
         }
         #endregion
+
+        GUILayout.EndScrollView();
     }
 
     public static void CreateObj(string objName, string path)
@@ -289,7 +441,7 @@ public class CreationWindow : EditorWindow
         InitShape(obj, objName);
     }
 
-    #region Create Primitives
+    #region Create Primitive Methods
     [MenuItem("GameObject/3D Object/Cube", false, 0)]
     public static void CreateCube()
     {
