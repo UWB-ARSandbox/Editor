@@ -17,7 +17,8 @@ public class NewScriptWindow : EditorWindow
 	private const string kTemplatePath = "CreateScriptDialog/SmartScriptTemplates";
 	private const string kResourcesTemplatePath = "Resources/SmartScriptTemplates";
 	private const string kMonoBehaviourName = "MonoBehaviour";
-	private const string kPlainClassName = "Empty Class";
+    private const string kCoreObjectBehaviourName = "coreObjectsBehavior";
+    private const string kPlainClassName = "Empty Class";
 	private const string kCustomEditorClassName = "Editor";
 	private const string kTempEditorClassPrefix = "E:";
 	private const string kNoTemplateString = "No Template Found";
@@ -263,13 +264,15 @@ public class NewScriptWindow : EditorWindow
 	{
 		private int GetRank (string s)
 		{
+            if (s == kCoreObjectBehaviourName)
+                return 0;
 			if (s == kMonoBehaviourName)
-				return 0;
-			if (s == kPlainClassName)
 				return 1;
+			if (s == kPlainClassName)
+				return 2;
 			if (s.StartsWith(kTempEditorClassPrefix))
 				return 100;
-			return 2;
+			return 3;
 		}
 		
 		public int Compare (string x, string y)
@@ -387,9 +390,9 @@ public class NewScriptWindow : EditorWindow
     public NewScriptWindow ()
 	{
 		// Large initial size
-		position = new Rect (50, 50, 770, 500);
+		position = new Rect (50, 50, 600, 150);
 		// But allow to scale down to smaller size
-		minSize = new Vector2 (550, 400);
+		minSize = new Vector2 (550, 50);
 		
 		m_ScriptPrescription = new ScriptPrescription ();
     }
@@ -624,7 +627,7 @@ public class NewScriptWindow : EditorWindow
 	
 	private bool CanAddComponent ()
 	{
-		return (m_GameObjectToAddTo != null && m_BaseClass == kMonoBehaviourName);
+		return (m_GameObjectToAddTo != null && (m_BaseClass == kMonoBehaviourName || m_BaseClass == kCoreObjectBehaviourName));
 	}
 	
 	private void OptionsGUI ()
@@ -645,7 +648,7 @@ public class NewScriptWindow : EditorWindow
 			
 			TemplateSelectionGUI ();
 			
-			if (GetTemplateName () == kMonoBehaviourName)
+			if (GetTemplateName () == kMonoBehaviourName || GetTemplateName() == kCoreObjectBehaviourName)
 			{
 				GUILayout.Space (10);
 				AttachToGUI ();
@@ -679,7 +682,7 @@ public class NewScriptWindow : EditorWindow
 
             //GUILayout.Space(20);
             
-            TemplateSelectionGUI();
+            //TemplateSelectionGUI();
 
             m_GameObjectToAddTo = activeObject;
 
@@ -693,8 +696,9 @@ public class NewScriptWindow : EditorWindow
             }
 
             GUILayout.Space(10);
+            GUILayout.FlexibleSpace();
 
-            FunctionsGUI();
+            //FunctionsGUI();
         }
         EditorGUILayout.EndVertical();
     }
@@ -771,7 +775,7 @@ public class NewScriptWindow : EditorWindow
         GUILayout.BeginHorizontal();
         {
             EditorGUILayout.LabelField("Attatch to");
-            //EditorGUILayout.LabelField(m_GameObjectToAddTo.name, EditorStyles.objectField);
+            EditorGUILayout.LabelField(m_GameObjectToAddTo.name, EditorStyles.objectField);
         }
         GUILayout.EndHorizontal();
     }
