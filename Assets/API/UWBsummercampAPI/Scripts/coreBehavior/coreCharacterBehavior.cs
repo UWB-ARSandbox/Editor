@@ -7,23 +7,31 @@ using UnityEngine;
 public class coreCharacterBehavior : MonoBehaviour
 {
     // Enums
-	protected enum direction {forward, back, left, right};
 	protected enum sizes {small, normal, big};
 
     // Flags
     protected bool isMovingFlag = false;
     protected bool isJumpingFlag = false;
 
+	public int points;
+
+	protected int goalPoints;
+
+	protected int speed;
+
     // Static Variables
     PhotonView pV;
 
     // Dynamic Variables
-    protected direction movingDirection = direction.forward;
 	protected sizes characterSize = sizes.normal;
 
     // Use this for initialization
     void Start ()
     {
+		points = 0;
+
+		goalPoints = 999999;
+
         pV = transform.GetComponent<PhotonView>();
 
         MethodInfo method = this.GetType().GetMethod("buildGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
@@ -41,16 +49,31 @@ public class coreCharacterBehavior : MonoBehaviour
         {
             method.Invoke(this, new object[0]);
         }
+
+		if (points >= goalPoints) {
+			winGame ();
+		}
+
+
+		if (isMovingFlag) {
+			transform.Translate(Vector3.forward * Time.deltaTime * speed);
+
+		}
     }
 
 
 
-	protected void moveForward( int speed = 5)
+	protected void moveForward( int speedTMP = 5)
     {
+		speed = speedTMP;
+		isMovingFlag = true;
+	}
 
-		movingDirection = direction.forward;
 
-        transform.Translate(Vector3.forward * Time.deltaTime * speed);
+	protected void stopMoving()
+	{
+
+		isMovingFlag = false;
 	}
 
     public bool makeSmaller( )
@@ -136,8 +159,39 @@ public class coreCharacterBehavior : MonoBehaviour
     }
     
 
-    public bool isJumping()
-    {
-        return isJumpingFlag;
-    }
+	public bool isJumping()
+	{
+		return isJumpingFlag;
+	}
+
+
+
+	public void addPoints( int pointsTMP = 10)
+	{
+		Debug.Log("addpoints!!");
+		points = points + pointsTMP;
+	}
+
+
+	protected void winGame() {
+			stopMoving ();
+			Instantiate(Resources.Load("WinCanvas"));
+	}
+
+
+
+	protected void loseGame() {
+
+		stopMoving ();
+			Instantiate(Resources.Load("LoseCanvas"));
+	}
+
+	protected void setGoal(int goalPointsTMP){
+
+		goalPoints = goalPointsTMP;
+
+	}
+
+
+
 }

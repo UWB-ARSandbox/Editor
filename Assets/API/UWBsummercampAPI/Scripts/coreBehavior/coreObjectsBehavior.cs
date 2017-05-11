@@ -1,7 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class coreObjectsBehavior : MonoBehaviour {
 
@@ -9,6 +10,48 @@ public class coreObjectsBehavior : MonoBehaviour {
 	protected bool touched = false;
 	private GameObject iteractionObj = null;
     private Color netColor;
+
+	private bool shouldSpin = false;
+
+	// Static Variables
+	PhotonView pV;
+
+	// Use this for initialization
+	void Start ()
+	{
+		pV = transform.GetComponent<PhotonView>();
+
+		MethodInfo method = this.GetType().GetMethod("buildGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
+		if (method != null)
+		{
+			method.Invoke(this, new object[0]);
+		}
+	}
+
+	// Update is called once per frame
+	void Update ()
+	{
+		MethodInfo method = this.GetType().GetMethod("updateGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
+		if (method != null)
+		{
+			method.Invoke(this, new object[0]);
+		}
+
+
+
+		if (shouldSpin){
+
+			transform.Rotate(0,20*Time.deltaTime,0);
+
+		}
+
+
+	}
+
+
+
+
+
 
     // Use this for initialization
     private void Awake()
@@ -94,7 +137,6 @@ public class coreObjectsBehavior : MonoBehaviour {
 			return false;
 		}else {
 			Debug.Log ("jump");
-			//iteractionObj.GetComponent<Rigidbody> ().AddForce (0, force, 0);
             iteractionObj.GetComponent<coreCharacterBehavior>().jump();
             iteractionObj = null;
 			return true;
@@ -119,6 +161,19 @@ public class coreObjectsBehavior : MonoBehaviour {
 	}
 
 
+	protected bool givePoints( int points = 10 ){
+
+		if (iteractionObj == null) {
+			Debug.Log ("Cannot give points: No player has been set yet!");
+			return false;
+		}else {
+			Debug.Log ("PointsGiven");
+			iteractionObj.GetComponent<coreCharacterBehavior>().addPoints(points);
+			iteractionObj = null;
+			return true;
+		}
+
+	}
 
 
 
@@ -170,7 +225,14 @@ public class coreObjectsBehavior : MonoBehaviour {
 
 
 
+	public void destroyObject(){
+		Destroy (this.gameObject);
+	}
 
+	public void spinObject(bool shouldSpinTMP){
+		shouldSpin = shouldSpinTMP;
+
+	}
 
 
 

@@ -14,6 +14,6 @@ public class test : coreCharacterBehavior {
     // Update is called once per frame
     void updateGame()
     {
-        moveForward ();
+        moveForward();
     }
 }
