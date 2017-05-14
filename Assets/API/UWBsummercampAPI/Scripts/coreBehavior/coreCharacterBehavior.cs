@@ -50,18 +50,18 @@ public class coreCharacterBehavior : MonoBehaviour
             method.Invoke(this, new object[0]);
         }
 
-		if (points >= goalPoints) {
+		if (points >= goalPoints)
+        {
 			winGame ();
 		}
 
 
-		if (isMovingFlag) {
+		if (isMovingFlag)
+        {
 			transform.Translate(Vector3.forward * Time.deltaTime * speed);
 
 		}
     }
-
-
 
 	protected void moveForward( int speedTMP = 5)
     {
@@ -83,8 +83,17 @@ public class coreCharacterBehavior : MonoBehaviour
 			return false;
 		}
 
-        // This file PunRPC
-        pV.RPC("makeSmallerRPC", PhotonTargets.All);
+        if (pV != null)
+        {
+            // This file PunRPC
+            pV.RPC("makeSmallerRPC", PhotonTargets.All);
+        }
+        else
+        {
+            // Make this character smaller without calling
+            //  an RPC; this is unnetworked
+            makeSmallerRPC();
+        }
 
         return true;
 	}
@@ -118,8 +127,17 @@ public class coreCharacterBehavior : MonoBehaviour
             return false;
         }
 
-        // This file PunRPC
-        pV.RPC("makeBiggerRPC", PhotonTargets.All);
+        if (pV != null)
+        {
+            // This file PunRPC
+            pV.RPC("makeBiggerRPC", PhotonTargets.All);
+        }
+        else
+        {
+            // Make this character bigger without calling
+            //  an RPC; this is unnetworked
+            makeBiggerRPC();
+        }
 
         return true;
     }
@@ -164,34 +182,84 @@ public class coreCharacterBehavior : MonoBehaviour
 		return isJumpingFlag;
 	}
 
+    #region GameManager Methods
+    /* =========================================== */
+    /* THESE METHODS SHOULD MOVE TO A GAME MANAGER */
 
-
-	public void addPoints( int pointsTMP = 10)
+    public void addPoints( int pointsTMP = 10)
 	{
-		Debug.Log("addpoints!!");
-		points = points + pointsTMP;
+		int totalPoints = points + pointsTMP;
+
+        if(pV != null)
+        {
+            // This file PunRPC
+            pV.RPC("setPointsRPC", PhotonTargets.All, totalPoints); // *
+        }
+        else
+        {
+            setPointsRPC(totalPoints);
+        }
 	}
 
 
-	protected void winGame() {
-			stopMoving ();
-			Instantiate(Resources.Load("WinCanvas"));
-	}
+    [PunRPC]
+    public void setPointsRPC (int pointTotal)
+    {
+        Debug.Log("addpoints!!");
+        points = pointTotal;
+    }
 
+	public void winGame()
+    {
+        if (pV != null)
+        {
+            // This file PunRPC
+            pV.RPC("winGameRPC", PhotonTargets.All); // *
+        }
+        else
+        {
+            // Make this character win
+            winGameRPC();
+        }
+    }
 
+    [PunRPC]
+    public void winGameRPC()
+    {
+        stopMoving();
+        Instantiate(Resources.Load("WinCanvas"));
+    }
 
-	protected void loseGame() {
+    public void loseGame()
+    {
+        if (pV != null)
+        {
+            // This file PunRPC
+            pV.RPC("loseGameRPC", PhotonTargets.All); // *
+        }
+        else
+        {
+            // Make this character win
+            loseGameRPC();
+        }
+    }
 
-		stopMoving ();
-			Instantiate(Resources.Load("LoseCanvas"));
-	}
+    [PunRPC]
+    public void loseGameRPC()
+    {
+        stopMoving();
+        Instantiate(Resources.Load("LoseCanvas"));
+    }
 
-	protected void setGoal(int goalPointsTMP){
-
+    // Does this need to be networked, or will we allow the server to dictate the win conditions,
+    //  and therefore just let the server call winGame?
+    // Will we need the goal for any kind of counter?
+    // Should students program in the goal on their own?
+	protected void setGoal(int goalPointsTMP)
+    {
 		goalPoints = goalPointsTMP;
-
 	}
 
-
-
+    /* =========================================== */
+    #endregion
 }

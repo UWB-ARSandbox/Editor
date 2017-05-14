@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-public class coreObjectsBehavior : MonoBehaviour {
-
+public class coreObjectsBehavior : MonoBehaviour
+{
 	protected bool playerIsTouchingFlag = false;
 	protected bool touched = false;
 	private GameObject iteractionObj = null;
@@ -39,10 +39,9 @@ public class coreObjectsBehavior : MonoBehaviour {
 
 
 
-		if (shouldSpin){
-
+		if (shouldSpin)
+        {
 			transform.Rotate(0,20*Time.deltaTime,0);
-
 		}
 
 
@@ -65,22 +64,28 @@ public class coreObjectsBehavior : MonoBehaviour {
     }
 
 
-	void OnCollisionEnter(Collision collision){
-
-		if (collision.gameObject.GetComponent<coreCharacterBehavior> () != null) {
-            playerIsTouchingFlag = true;
+	void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("Collision with [" + collision.gameObject.name + "]");
+		if (collision.gameObject.GetComponent<coreCharacterBehavior> () != null)
+        {
 			iteractionObj = collision.gameObject;
-		}
+            playerIsTouchingFlag = true;
+        }
 	}
 		
 
 
-	protected bool turnPlayerLeft() {
+	protected bool turnPlayerLeft()
+    {
 
-		if (iteractionObj == null) {
+		if (iteractionObj == null)
+        {
 			Debug.Log ("Cannot Turn Left: No player has been set yet!");
 			return false;
-		} else {
+		}
+        else
+        {
 			Debug.Log ("Left");
 
 			iteractionObj.transform.Rotate (new Vector3 (iteractionObj.transform.rotation.x, -90, iteractionObj.transform.rotation.z));
@@ -91,12 +96,16 @@ public class coreObjectsBehavior : MonoBehaviour {
 	}
 
 
-	protected bool turnPlayerRight() {
+	protected bool turnPlayerRight()
+    {
 
-		if (iteractionObj == null) {
+		if (iteractionObj == null)
+        {
 			Debug.Log ("Cannot Turn Right: No player has been set yet!");
 			return false;
-		} else {
+		}
+        else
+        {
 			Debug.Log ("Right");
 
 			iteractionObj.transform.Rotate (new Vector3 (iteractionObj.transform.rotation.x, 90, iteractionObj.transform.rotation.z));
@@ -107,12 +116,16 @@ public class coreObjectsBehavior : MonoBehaviour {
 	}
 
 
-	protected bool turnPlayerBackwards() {
+	protected bool turnPlayerBackwards()
+    {
 
-		if (iteractionObj == null) {
+		if (iteractionObj == null)
+        {
 			Debug.Log ("Cannot Turn Right: No player has been set yet!");
 			return false;
-		} else {
+		}
+        else
+        {
 			Debug.Log ("Around");
 
 			iteractionObj.transform.Rotate (new Vector3 (iteractionObj.transform.rotation.x, 180, iteractionObj.transform.rotation.z));
@@ -127,15 +140,19 @@ public class coreObjectsBehavior : MonoBehaviour {
 
 
 
-	protected bool jumpPlayer(int forceTMP = 10 ){
+	protected bool jumpPlayer(int forceTMP = 10 )
+    {
 
 
 		int force = forceTMP *50;
 
-		if (iteractionObj == null) {
+		if (iteractionObj == null)
+        {
 			Debug.Log ("Cannot Jump: No player has been set yet!");
 			return false;
-		}else {
+		}
+        else
+        {
 			Debug.Log ("jump");
             iteractionObj.GetComponent<coreCharacterBehavior>().jump();
             iteractionObj = null;
@@ -146,12 +163,16 @@ public class coreObjectsBehavior : MonoBehaviour {
 
 
 
-	protected bool makePlayerSmaller( ){
+	protected bool makePlayerSmaller( )
+    {
 
-		if (iteractionObj == null) {
+		if (iteractionObj == null)
+        {
 			Debug.Log ("Cannot Make Player Smaller: No player has been set yet!");
 			return false;
-		}else {
+		}
+        else
+        {
 			Debug.Log ("MakePlayerSmaller()");
 			iteractionObj.GetComponent<coreCharacterBehavior>().makeSmaller();
 			iteractionObj = null;
@@ -163,10 +184,13 @@ public class coreObjectsBehavior : MonoBehaviour {
 
 	protected bool givePoints( int points = 10 ){
 
-		if (iteractionObj == null) {
+		if (iteractionObj == null)
+        {
 			Debug.Log ("Cannot give points: No player has been set yet!");
 			return false;
-		}else {
+		}
+        else
+        {
 			Debug.Log ("PointsGiven");
 			iteractionObj.GetComponent<coreCharacterBehavior>().addPoints(points);
 			iteractionObj = null;
@@ -177,27 +201,32 @@ public class coreObjectsBehavior : MonoBehaviour {
 
 
 
-	protected bool makePlayerBigger( ){
-
-		if (iteractionObj == null) {
+	protected bool makePlayerBigger( )
+    {
+		if (iteractionObj == null)
+        {
 			Debug.Log ("Cannot Make Player Bigger: No player has been set yet!");
 			return false;
-		}else {
+		}
+        else
+        {
 			Debug.Log ("MakePlayerBigger()");
 			iteractionObj.GetComponent<coreCharacterBehavior>().makeBigger();
 			iteractionObj = null;
 			return true;
 		}
-
 	}
 
 
-    protected bool winGame() {
-
-		if (iteractionObj == null) {
+    protected bool winGame()
+    {
+		if (iteractionObj == null)
+        {
 			Debug.Log ("Cannot Win: No player has been set yet!");
 			return false;
-		} else {
+		}
+        else
+        {
 			Instantiate(Resources.Load("WinCanvas"));
 			iteractionObj.SetActive (false);
 			iteractionObj = null;
@@ -209,12 +238,16 @@ public class coreObjectsBehavior : MonoBehaviour {
 
 
 
-	protected bool loseGame() {
+	protected bool loseGame()
+    {
 
-		if (iteractionObj == null) {
+		if (iteractionObj == null)
+        {
 			Debug.Log ("Cannot Lose: No player has been set yet!");
 			return false;
-		} else {
+		}
+        else
+        {
 			Instantiate(Resources.Load("LoseCanvas"));
 			iteractionObj.SetActive (false);
 			iteractionObj = null;
@@ -225,20 +258,24 @@ public class coreObjectsBehavior : MonoBehaviour {
 
 
 
-	public void destroyObject(){
+	public void destroyObject()
+    {
 		Destroy (this.gameObject);
 	}
 
-	public void spinObject(bool shouldSpinTMP){
+	public void spinObject(bool shouldSpinTMP)
+    {
 		shouldSpin = shouldSpinTMP;
 
 	}
 
 
 
-	void OnCollisionExit(Collision collision){
+	void OnCollisionExit(Collision collision)
+    {
 
-		if (collision.gameObject.GetComponent<coreCharacterBehavior> () != null) {
+		if (collision.gameObject.GetComponent<coreCharacterBehavior> () != null)
+        {
             playerIsTouchingFlag = false;
 		}
 	}
