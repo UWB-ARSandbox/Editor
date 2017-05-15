@@ -60,7 +60,11 @@ public class coreObjectsBehavior : MonoBehaviour
 
     protected bool playerIsTouching()
     {
-        return playerIsTouchingFlag;
+        // Consume touching event? We consume
+        //  it in every other event
+        bool retVal = playerIsTouchingFlag;
+        playerIsTouchingFlag = false;
+        return retVal;
     }
 
 
@@ -88,7 +92,11 @@ public class coreObjectsBehavior : MonoBehaviour
         {
 			Debug.Log ("Left");
 
-			iteractionObj.transform.Rotate (new Vector3 (iteractionObj.transform.rotation.x, -90, iteractionObj.transform.rotation.z));
+            // Shave off excess rotation to (TRY to) ensure moving in a cardinal direction
+            double newY = Math.Round(iteractionObj.transform.rotation.eulerAngles.y / 90);
+            newY = ((int)newY - 1) % 4;
+
+            iteractionObj.transform.rotation = Quaternion.Euler(0, (int)newY * 90, 0);
 			iteractionObj = null;
 			return true;
 		}
@@ -108,9 +116,13 @@ public class coreObjectsBehavior : MonoBehaviour
         {
 			Debug.Log ("Right");
 
-			iteractionObj.transform.Rotate (new Vector3 (iteractionObj.transform.rotation.x, 90, iteractionObj.transform.rotation.z));
-			iteractionObj = null;
-			return true;
+            // Shave off excess rotation to (TRY to) ensure moving in a cardinal direction
+            double newY = Math.Round(iteractionObj.transform.rotation.eulerAngles.y / 90);
+            newY = ((int)newY + 1) % 4;
+
+            iteractionObj.transform.rotation = Quaternion.Euler(0, (int)newY * 90, 0);
+            iteractionObj = null;
+            return true;
 		}
 
 	}
@@ -280,9 +292,74 @@ public class coreObjectsBehavior : MonoBehaviour
 		}
 	}
 
+    // Change to a random color
+    public void changeColor()
+    {
+        changeColor(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
+    }
+
+    public void changeColor(string color)
+    {
+        switch(color.ToLower())
+        {
+            case "red":
+            case "r":
+                changeColor(1.0f, 0, 0);
+                break;
+            case "blue":
+            case "b":
+                changeColor(0, 0, 1.0f);
+                break;
+            case "yellow":
+            case "y":
+                changeColor(1.0f, 1.0f, 0);
+                break;
+            case "green":
+            case "g":
+                changeColor(0, 1.0f, 0);
+                break;
+            case "orange":
+            case "o":
+                changeColor(1.0f, 0.5f, 0);
+                break;
+            case "purple":
+            case "p":
+                changeColor(0.6f, 0, 0.6f);
+                break;
+            case "pink":
+                changeColor(1.0f, 0.25f, 1.0f);
+                break;
+            case "white":
+            case "w":
+                changeColor(1.0f, 1.0f, 1.0f);
+                break;
+            case "gray":
+            case "grey":
+                changeColor(0.6f, 0.6f, 0.6f);
+                break;
+            case "black":
+            case "k":
+                changeColor(0, 0, 0);
+                break;
+        }
+    }
+
+    public void changeColor(float r, float g, float b)
+    {
+        if (pV != null)
+        {
+            // This file PunRPC
+            pV.RPC("ChangeColorRPC", PhotonTargets.All, r, g, b); // *
+        }
+        else
+        {
+            // Make this character win
+            ChangeColorRPC(r, g, b);
+        }
+    }
 
     [PunRPC]
-    public void ChangeColor(float r, float g, float b)
+    public void ChangeColorRPC(float r, float g, float b)
     {
         if (this.gameObject.GetComponent<Renderer>() == null)
         {
