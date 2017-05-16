@@ -1,19 +1,18 @@
 using UnityEngine;
 
-public class PlayerMovement : coreCharacterBehavior {
+public class player2 : coreCharacterBehavior {
 	
 	// buildGame() is called once, at the start
 	// of the game
 	void buildGame () {
-
-		setGoal (20);
-		moveForward ();	
+		setGoal (10);
 	}
 	
 	// updateGame() is called many times per
 	// second
 	void updateGame () {
-		
+		moveForward ();
+		makeSmallerRPC ();
 	}
 	
 }
