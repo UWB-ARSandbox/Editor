@@ -57,6 +57,6 @@ public class SpawnScript : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
         Color thisColor = gameObject.GetComponent<Renderer>().material.color;
-        pv.RPC("ChangeColor", PhotonTargets.All, thisColor.r, thisColor.g, thisColor.b);
+        pv.RPC("ChangeColorRPC", PhotonTargets.All, thisColor.r, thisColor.g, thisColor.b);
     }
 }

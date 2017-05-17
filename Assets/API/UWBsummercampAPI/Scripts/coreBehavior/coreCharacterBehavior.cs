@@ -7,30 +7,32 @@ using UnityEngine;
 public class coreCharacterBehavior : MonoBehaviour
 {
     // Enums
-	protected enum sizes {small, normal, big};
+    protected enum sizes { small, normal, big };
 
     // Flags
     protected bool isMovingFlag = false;
     protected bool isJumpingFlag = false;
+    protected bool winFlag = false;
+    protected bool loseFlag = false;
 
-	public int points;
+    public int points;
 
-	protected int goalPoints;
+    protected int goalPoints;
 
-	protected int speed;
+    protected int speed;
 
     // Static Variables
     PhotonView pV;
 
     // Dynamic Variables
-	protected sizes characterSize = sizes.normal;
+    protected sizes characterSize = sizes.normal;
 
     // Use this for initialization
-    void Start ()
+    void Start()
     {
-		points = 0;
+        points = 0;
 
-		goalPoints = 999999;
+        goalPoints = 999999;
 
         pV = transform.GetComponent<PhotonView>();
 
@@ -40,9 +42,9 @@ public class coreCharacterBehavior : MonoBehaviour
             method.Invoke(this, new object[0]);
         }
     }
-	
-	// Update is called once per frame
-	void Update ()
+
+    // Update is called once per frame
+    void Update()
     {
         MethodInfo method = this.GetType().GetMethod("updateGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
         if (method != null)
@@ -50,38 +52,38 @@ public class coreCharacterBehavior : MonoBehaviour
             method.Invoke(this, new object[0]);
         }
 
-		if (points >= goalPoints)
+        if (points >= goalPoints)
         {
-			winGame ();
-		}
+            winGame();
+        }
 
 
-		if (isMovingFlag)
+        if (isMovingFlag)
         {
-			transform.Translate(Vector3.forward * Time.deltaTime * speed);
+            transform.Translate(Vector3.forward * Time.deltaTime * speed);
 
-		}
+        }
     }
 
-	protected void moveForward( int speedTMP = 5)
+    protected void moveForward(int speedTMP = 5)
     {
-		speed = speedTMP;
-		isMovingFlag = true;
-	}
+        speed = speedTMP;
+        isMovingFlag = true;
+    }
 
 
-	protected void stopMoving()
-	{
+    protected void stopMoving()
+    {
 
-		isMovingFlag = false;
-	}
+        isMovingFlag = false;
+    }
 
-    public bool makeSmaller( )
+    public bool makeSmaller()
     {
         if (characterSize == sizes.small)
         {
-			return false;
-		}
+            return false;
+        }
 
         if (pV != null)
         {
@@ -96,7 +98,7 @@ public class coreCharacterBehavior : MonoBehaviour
         }
 
         return true;
-	}
+    }
 
     [PunRPC]
     public void makeSmallerRPC()
@@ -175,22 +177,22 @@ public class coreCharacterBehavior : MonoBehaviour
         int force = forceTMP * 50;
         GetComponent<Rigidbody>().AddForce(0, force, 0);
     }
-    
 
-	public bool isJumping()
-	{
-		return isJumpingFlag;
-	}
+
+    public bool isJumping()
+    {
+        return isJumpingFlag;
+    }
 
     #region GameManager Methods
     /* =========================================== */
     /* THESE METHODS SHOULD MOVE TO A GAME MANAGER */
 
-    public void addPoints( int pointsTMP = 10)
-	{
-		int totalPoints = points + pointsTMP;
+    public void addPoints(int pointsTMP = 10)
+    {
+        int totalPoints = points + pointsTMP;
 
-        if(pV != null)
+        if (pV != null)
         {
             // This file PunRPC
             pV.RPC("setPointsRPC", PhotonTargets.All, totalPoints); // *
@@ -199,17 +201,17 @@ public class coreCharacterBehavior : MonoBehaviour
         {
             setPointsRPC(totalPoints);
         }
-	}
+    }
 
 
     [PunRPC]
-    public void setPointsRPC (int pointTotal)
+    public void setPointsRPC(int pointTotal)
     {
         Debug.Log("addpoints!!");
         points = pointTotal;
     }
 
-	public void winGame()
+    public void winGame()
     {
         if (pV != null)
         {
@@ -226,8 +228,12 @@ public class coreCharacterBehavior : MonoBehaviour
     [PunRPC]
     public void winGameRPC()
     {
-        stopMoving();
-        Instantiate(Resources.Load("WinCanvas"));
+        if (!winFlag && !loseFlag)
+        {
+            winFlag = true;
+            stopMoving();
+            Instantiate(Resources.Load("WinCanvas"));
+        }
     }
 
     public void loseGame()
@@ -247,18 +253,22 @@ public class coreCharacterBehavior : MonoBehaviour
     [PunRPC]
     public void loseGameRPC()
     {
-        stopMoving();
-        Instantiate(Resources.Load("LoseCanvas"));
+        if (!winFlag && !loseFlag)
+        {
+            loseFlag = true;
+            stopMoving();
+            Instantiate(Resources.Load("LoseCanvas"));
+        }
     }
 
     // Does this need to be networked, or will we allow the server to dictate the win conditions,
     //  and therefore just let the server call winGame?
     // Will we need the goal for any kind of counter?
     // Should students program in the goal on their own?
-	protected void setGoal(int goalPointsTMP)
+    protected void setGoal(int goalPointsTMP)
     {
-		goalPoints = goalPointsTMP;
-	}
+        goalPoints = goalPointsTMP;
+    }
 
     /* =========================================== */
     #endregion

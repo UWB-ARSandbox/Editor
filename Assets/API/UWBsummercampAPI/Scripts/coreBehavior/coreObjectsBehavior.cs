@@ -6,49 +6,51 @@ using UnityEngine;
 
 public class coreObjectsBehavior : MonoBehaviour
 {
-	protected bool playerIsTouchingFlag = false;
-	protected bool touched = false;
-	private GameObject iteractionObj = null;
+    protected bool playerIsTouchingFlag = false;
+    protected bool touched = false;
+    private GameObject iteractionObj = null;
     private Color netColor;
 
-	private bool shouldSpin = false;
+    private bool shouldSpin = false;
 
-	// Static Variables
-	PhotonView pV;
+    // Static Variables
+    PhotonView pV;
 
-	// Use this for initialization
-	void Start ()
-	{
-		pV = transform.GetComponent<PhotonView>();
+    // Use this for initialization
+    void Start()
+    {
+        pV = transform.GetComponent<PhotonView>();
 
-		MethodInfo method = this.GetType().GetMethod("buildGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
-		if (method != null)
-		{
-			method.Invoke(this, new object[0]);
-		}
-	}
-
-	// Update is called once per frame
-	void Update ()
-	{
-		MethodInfo method = this.GetType().GetMethod("updateGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
-		if (method != null)
-		{
-			method.Invoke(this, new object[0]);
-		}
-
-
-
-		if (shouldSpin)
+        MethodInfo method = this.GetType().GetMethod("buildGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
+        if (method != null)
         {
-			transform.Rotate(0,20*Time.deltaTime,0);
-		}
+            method.Invoke(this, new object[0]);
+        }
+
+        if (pV != null && PhotonNetwork.connectionStateDetailed == ClientState.Joined)
+        {
+            pV.RPC("RequestColorRPC", PhotonTargets.MasterClient);
+        }
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        MethodInfo method = this.GetType().GetMethod("updateGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
+        if (method != null)
+        {
+            method.Invoke(this, new object[0]);
+        }
 
 
-	}
+
+        if (shouldSpin)
+        {
+            transform.Rotate(0, 20 * Time.deltaTime, 0);
+        }
 
 
-
+    }
 
 
 
@@ -68,53 +70,53 @@ public class coreObjectsBehavior : MonoBehaviour
     }
 
 
-	void OnCollisionEnter(Collision collision)
+    void OnCollisionEnter(Collision collision)
     {
         Debug.Log("Collision with [" + collision.gameObject.name + "]");
-		if (collision.gameObject.GetComponent<coreCharacterBehavior> () != null)
+        if (collision.gameObject.GetComponent<coreCharacterBehavior>() != null)
         {
-			iteractionObj = collision.gameObject;
+            iteractionObj = collision.gameObject;
             playerIsTouchingFlag = true;
         }
-	}
-		
+    }
 
 
-	protected bool turnPlayerLeft()
+
+    protected bool turnPlayerLeft()
     {
 
-		if (iteractionObj == null)
+        if (iteractionObj == null)
         {
-			Debug.Log ("Cannot Turn Left: No player has been set yet!");
-			return false;
-		}
+            Debug.Log("Cannot Turn Left: No player has been set yet!");
+            return false;
+        }
         else
         {
-			Debug.Log ("Left");
+            Debug.Log("Left");
 
             // Shave off excess rotation to (TRY to) ensure moving in a cardinal direction
             double newY = Math.Round(iteractionObj.transform.rotation.eulerAngles.y / 90);
             newY = ((int)newY - 1) % 4;
 
             iteractionObj.transform.rotation = Quaternion.Euler(0, (int)newY * 90, 0);
-			iteractionObj = null;
-			return true;
-		}
+            iteractionObj = null;
+            return true;
+        }
 
-	}
+    }
 
 
-	protected bool turnPlayerRight()
+    protected bool turnPlayerRight()
     {
 
-		if (iteractionObj == null)
+        if (iteractionObj == null)
         {
-			Debug.Log ("Cannot Turn Right: No player has been set yet!");
-			return false;
-		}
+            Debug.Log("Cannot Turn Right: No player has been set yet!");
+            return false;
+        }
         else
         {
-			Debug.Log ("Right");
+            Debug.Log("Right");
 
             // Shave off excess rotation to (TRY to) ensure moving in a cardinal direction
             double newY = Math.Round(iteractionObj.transform.rotation.eulerAngles.y / 90);
@@ -123,174 +125,175 @@ public class coreObjectsBehavior : MonoBehaviour
             iteractionObj.transform.rotation = Quaternion.Euler(0, (int)newY * 90, 0);
             iteractionObj = null;
             return true;
-		}
+        }
 
-	}
+    }
 
 
-	protected bool turnPlayerBackwards()
+    protected bool turnPlayerBackwards()
     {
 
-		if (iteractionObj == null)
+        if (iteractionObj == null)
         {
-			Debug.Log ("Cannot Turn Right: No player has been set yet!");
-			return false;
-		}
+            Debug.Log("Cannot Turn Right: No player has been set yet!");
+            return false;
+        }
         else
         {
-			Debug.Log ("Around");
+            Debug.Log("Around");
 
-			iteractionObj.transform.Rotate (new Vector3 (iteractionObj.transform.rotation.x, 180, iteractionObj.transform.rotation.z));
-			iteractionObj = null;
-			return true;
-		}
+            iteractionObj.transform.Rotate(new Vector3(iteractionObj.transform.rotation.x, 180, iteractionObj.transform.rotation.z));
+            iteractionObj = null;
+            return true;
+        }
 
-	}
-
-
+    }
 
 
 
 
-	protected bool jumpPlayer(int forceTMP = 10 )
+
+
+    protected bool jumpPlayer(int forceTMP = 10)
     {
 
 
-		int force = forceTMP *50;
+        int force = forceTMP * 50;
 
-		if (iteractionObj == null)
+        if (iteractionObj == null)
         {
-			Debug.Log ("Cannot Jump: No player has been set yet!");
-			return false;
-		}
+            Debug.Log("Cannot Jump: No player has been set yet!");
+            return false;
+        }
         else
         {
-			Debug.Log ("jump");
+            Debug.Log("jump");
             iteractionObj.GetComponent<coreCharacterBehavior>().jump();
             iteractionObj = null;
-			return true;
-		}
+            return true;
+        }
 
-	}
+    }
 
 
 
-	protected bool makePlayerSmaller( )
+    protected bool makePlayerSmaller()
     {
 
-		if (iteractionObj == null)
+        if (iteractionObj == null)
         {
-			Debug.Log ("Cannot Make Player Smaller: No player has been set yet!");
-			return false;
-		}
+            Debug.Log("Cannot Make Player Smaller: No player has been set yet!");
+            return false;
+        }
         else
         {
-			Debug.Log ("MakePlayerSmaller()");
-			iteractionObj.GetComponent<coreCharacterBehavior>().makeSmaller();
-			iteractionObj = null;
-			return true;
-		}
+            Debug.Log("MakePlayerSmaller()");
+            iteractionObj.GetComponent<coreCharacterBehavior>().makeSmaller();
+            iteractionObj = null;
+            return true;
+        }
 
-	}
-
-
-	protected bool givePoints( int points = 10 ){
-
-		if (iteractionObj == null)
-        {
-			Debug.Log ("Cannot give points: No player has been set yet!");
-			return false;
-		}
-        else
-        {
-			Debug.Log ("PointsGiven");
-			iteractionObj.GetComponent<coreCharacterBehavior>().addPoints(points);
-			iteractionObj = null;
-			return true;
-		}
-
-	}
+    }
 
 
-
-	protected bool makePlayerBigger( )
+    protected bool givePoints(int points = 10)
     {
-		if (iteractionObj == null)
+
+        if (iteractionObj == null)
         {
-			Debug.Log ("Cannot Make Player Bigger: No player has been set yet!");
-			return false;
-		}
+            Debug.Log("Cannot give points: No player has been set yet!");
+            return false;
+        }
         else
         {
-			Debug.Log ("MakePlayerBigger()");
-			iteractionObj.GetComponent<coreCharacterBehavior>().makeBigger();
-			iteractionObj = null;
-			return true;
-		}
-	}
+            Debug.Log("PointsGiven");
+            iteractionObj.GetComponent<coreCharacterBehavior>().addPoints(points);
+            iteractionObj = null;
+            return true;
+        }
+
+    }
+
+
+
+    protected bool makePlayerBigger()
+    {
+        if (iteractionObj == null)
+        {
+            Debug.Log("Cannot Make Player Bigger: No player has been set yet!");
+            return false;
+        }
+        else
+        {
+            Debug.Log("MakePlayerBigger()");
+            iteractionObj.GetComponent<coreCharacterBehavior>().makeBigger();
+            iteractionObj = null;
+            return true;
+        }
+    }
 
 
     protected bool winGame()
     {
-		if (iteractionObj == null)
+        if (iteractionObj == null)
         {
-			Debug.Log ("Cannot Win: No player has been set yet!");
-			return false;
-		}
+            Debug.Log("Cannot Win: No player has been set yet!");
+            return false;
+        }
         else
         {
-			Instantiate(Resources.Load("WinCanvas"));
-			iteractionObj.SetActive (false);
-			iteractionObj = null;
+            Instantiate(Resources.Load("WinCanvas"));
+            iteractionObj.SetActive(false);
+            iteractionObj = null;
             playerIsTouchingFlag = false;
 
-			return true;
-		}
-	}
+            return true;
+        }
+    }
 
 
 
-	protected bool loseGame()
+    protected bool loseGame()
     {
 
-		if (iteractionObj == null)
+        if (iteractionObj == null)
         {
-			Debug.Log ("Cannot Lose: No player has been set yet!");
-			return false;
-		}
+            Debug.Log("Cannot Lose: No player has been set yet!");
+            return false;
+        }
         else
         {
-			Instantiate(Resources.Load("LoseCanvas"));
-			iteractionObj.SetActive (false);
-			iteractionObj = null;
-			playerIsTouchingFlag = false;
-			return true;
-		}
-	}
+            Instantiate(Resources.Load("LoseCanvas"));
+            iteractionObj.SetActive(false);
+            iteractionObj = null;
+            playerIsTouchingFlag = false;
+            return true;
+        }
+    }
 
 
 
-	public void destroyObject()
+    public void destroyObject()
     {
-		Destroy (this.gameObject);
-	}
+        Destroy(this.gameObject);
+    }
 
-	public void spinObject(bool shouldSpinTMP)
+    public void spinObject(bool shouldSpinTMP)
     {
-		shouldSpin = shouldSpinTMP;
+        shouldSpin = shouldSpinTMP;
 
-	}
+    }
 
 
 
-	void OnCollisionExit(Collision collision)
+    void OnCollisionExit(Collision collision)
     {
 
-		if (collision.gameObject.GetComponent<coreCharacterBehavior> () != null)
+        if (collision.gameObject.GetComponent<coreCharacterBehavior>() != null)
         {
             playerIsTouchingFlag = false;
-		}
-	}
+        }
+    }
 
     // Change to a random color
     public void changeColor()
@@ -300,7 +303,7 @@ public class coreObjectsBehavior : MonoBehaviour
 
     public void changeColor(string color)
     {
-        switch(color.ToLower())
+        switch (color.ToLower())
         {
             case "red":
             case "r":
@@ -368,5 +371,14 @@ public class coreObjectsBehavior : MonoBehaviour
         }
 
         this.gameObject.GetComponent<Renderer>().material.color = new Color(r, g, b);
+    }
+
+    [PunRPC]
+    public void RequestColorRPC()
+    {
+        Debug.Log("Request Color RPC");
+        PhotonView phov = gameObject.GetComponent<PhotonView>();
+        Color thisColor = gameObject.GetComponent<Renderer>().material.color;
+        phov.RPC("ChangeColorRPC", PhotonTargets.All, thisColor.r, thisColor.g, thisColor.b);
     }
 }
