@@ -8,12 +8,20 @@ public class SpawnScript : MonoBehaviour
     bool sent = false;
     public string prefabName = "Cube";
 
+    void Start()
+    {
+        sent = false;
+    }
+
 	// Update is called once per frame
 	void Update ()
     {
         // If we've sent, skip this script
         if (sent)
+        {
+            this.enabled = false;
             return;
+        }
 
         // If we're "fully" connected to a room
         if ((PhotonNetwork.connectionStateDetailed == ClientState.ConnectedToGameserver || PhotonNetwork.connectionStateDetailed == ClientState.Joined) && !PhotonNetwork.connecting)
@@ -28,12 +36,17 @@ public class SpawnScript : MonoBehaviour
     {
         yield return new WaitForSeconds(2); // Wait 2 seconds to ensure room connectivity
 
+        SendNow();
+    }
+
+    public void SendNow(bool reallocate = false)
+    {
         // Create a list of ViewIds (for SendInstantiate)
         PhotonView[] views = gameObject.GetPhotonViewsInChildren();
         int[] viewIDs = new int[views.Length];
         for (int i = 0; i < viewIDs.Length; i++)
         {
-            if(views[i].viewID == 0)
+            if (views[i].viewID == 0 || reallocate)
             {
                 views[i].viewID = PhotonNetwork.AllocateViewID();
             }

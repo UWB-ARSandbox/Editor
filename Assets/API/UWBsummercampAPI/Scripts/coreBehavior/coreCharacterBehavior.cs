@@ -10,67 +10,104 @@ public class coreCharacterBehavior : MonoBehaviour
     protected enum sizes { small, normal, big };
 
     // Flags
+    protected bool startupFlag = true;
     protected bool isMovingFlag = false;
     protected bool isJumpingFlag = false;
-    protected bool winFlag = false;
-    protected bool loseFlag = false;
-
-    public int points;
-
-    protected int goalPoints;
-
-    protected int speed;
-
-    // Static Variables
-    PhotonView pV;
+    protected bool timerRunningFlag = false;
+    protected bool timerFinishedFlag = false;
+    protected bool timerLoopFlag = false;
 
     // Dynamic Variables
     protected sizes characterSize = sizes.normal;
+    private GameObject lastSpawned = null;
+    private TextMesh objText = null;
+    protected int speed;
+    private float timer = 0;
+    private int timerMax = 10;
 
+    // Constant Variables
+    PhotonView pV;
+    MethodInfo startMethod;
+    MethodInfo updateMethod;
+
+    #region Unity Methods
     // Use this for initialization
     void Start()
     {
-        points = 0;
-
-        goalPoints = 999999;
-
         pV = transform.GetComponent<PhotonView>();
 
-        MethodInfo method = this.GetType().GetMethod("buildGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
-        if (method != null)
-        {
-            method.Invoke(this, new object[0]);
-        }
+        startMethod = this.GetType().GetMethod("buildGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
+        updateMethod = this.GetType().GetMethod("updateGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
     }
 
     // Update is called once per frame
     void Update()
     {
-        MethodInfo method = this.GetType().GetMethod("updateGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
-        if (method != null)
+        // Wait for the client to connect to the server before updating
+        if (startupFlag && !isConnected())
         {
-            method.Invoke(this, new object[0]);
+            // If we're not networked, skip this step
+            if (pV == null)
+                startupFlag = false;
+            return;
         }
-
-        if (points >= goalPoints)
+        else if(startupFlag)
         {
-            winGame();
+            startupFlag = false;
+            if (startMethod != null)
+            {
+                startMethod.Invoke(this, new object[0]);
+            }
+        }
+        
+        if (updateMethod != null)
+        {
+            updateMethod.Invoke(this, new object[0]);
         }
 
 
         if (isMovingFlag)
         {
             transform.Translate(Vector3.forward * Time.deltaTime * speed);
+        }
 
+        // Consume timer event
+        timerFinishedFlag = false;
+
+        // Determine if timer is finished
+        if (timerRunningFlag)
+        {
+            timer = timer + Time.deltaTime;
+
+            if (timer > timerMax)
+            {
+                timerFinishedFlag = true;
+                if (timerLoopFlag)
+                {
+                    timer = 0;
+                }
+                else
+                {
+                    stopTimer();
+                }
+            }
         }
     }
+    #endregion
 
+    #region Public Network Methods
+    public bool isConnected()
+    {
+        return PhotonNetwork.connectionStateDetailed == ClientState.Joined;
+    }
+    #endregion
+
+    #region Movement
     protected void moveForward(int speedTMP = 5)
     {
         speed = speedTMP;
         isMovingFlag = true;
     }
-
 
     protected void stopMoving()
     {
@@ -78,6 +115,48 @@ public class coreCharacterBehavior : MonoBehaviour
         isMovingFlag = false;
     }
 
+    public bool isMoving()
+    {
+        return isMovingFlag;
+    }
+    
+    public void teleportForward(int distance = 5)
+    {
+        Vector3 newPosition = gameObject.transform.position;
+        newPosition += gameObject.transform.forward*distance;
+        gameObject.transform.position = newPosition;
+    }
+
+    public void turnLeft()
+    {
+        // Shave off excess rotation to (TRY to) ensure moving in a cardinal direction
+        double newY = Math.Round(gameObject.transform.rotation.eulerAngles.y / 90);
+        newY = ((int)newY - 1) % 4;
+
+        gameObject.transform.rotation = Quaternion.Euler(0, (int)newY * 90, 0);
+    }
+
+
+    public void turnRight()
+    {
+        // Shave off excess rotation to (TRY to) ensure moving in a cardinal direction
+        double newY = Math.Round(gameObject.transform.rotation.eulerAngles.y / 90);
+        newY = ((int)newY + 1) % 4;
+
+        gameObject.transform.rotation = Quaternion.Euler(0, (int)newY * 90, 0);
+    }
+
+    public void turnAround()
+    {
+        // Shave off excess rotation to (TRY to) ensure moving in a cardinal direction
+        double newY = Math.Round(gameObject.transform.rotation.eulerAngles.y / 90);
+        newY = ((int)newY + 2) % 4;
+
+        gameObject.transform.rotation = Quaternion.Euler(0, (int)newY * 90, 0);
+    }
+    #endregion
+
+    #region Bigger/Smaller
     public bool makeSmaller()
     {
         if (characterSize == sizes.small)
@@ -166,110 +245,240 @@ public class coreCharacterBehavior : MonoBehaviour
             m_Capsule.center = m_Capsule.center * 3f;
         }
     }
+    #endregion
 
-    public bool isMoving()
-    {
-        return isMovingFlag;
-    }
 
     public void jump(int forceTMP = 10)
     {
         int force = forceTMP * 50;
         GetComponent<Rigidbody>().AddForce(0, force, 0);
     }
-
-
+    
     public bool isJumping()
     {
         return isJumpingFlag;
     }
 
-    #region GameManager Methods
-    /* =========================================== */
-    /* THESE METHODS SHOULD MOVE TO A GAME MANAGER */
-
-    public void addPoints(int pointsTMP = 10)
+    #region Visibility
+    public void makeInvisible()
     {
-        int totalPoints = points + pointsTMP;
-
         if (pV != null)
         {
             // This file PunRPC
-            pV.RPC("setPointsRPC", PhotonTargets.All, totalPoints); // *
+            pV.RPC("makeInvsRPC", PhotonTargets.All); // *
         }
         else
         {
-            setPointsRPC(totalPoints);
+            // Make player invisible
+            makeInvsRPC();
         }
     }
 
-
     [PunRPC]
-    public void setPointsRPC(int pointTotal)
+    public void makeInvsRPC()
     {
-        Debug.Log("addpoints!!");
-        points = pointTotal;
+        gameObject.GetComponent<Renderer>().enabled = false;
     }
 
+    public void makeVisible()
+    {
+        if (pV != null)
+        {
+            // This file PunRPC
+            pV.RPC("makeVisRPC", PhotonTargets.All); // *
+        }
+        else
+        {
+            // Make player visible
+            makeVisRPC();
+        }
+    }
+
+    [PunRPC]
+    public void makeVisRPC()
+    {
+        gameObject.GetComponent<Renderer>().enabled = true;
+    }
+
+    public bool isVisible()
+    {
+        return gameObject.GetComponent<Renderer>().isVisible;
+    }
+    #endregion
+
+    #region GameManager Methods
     public void winGame()
     {
-        if (pV != null)
-        {
-            // This file PunRPC
-            pV.RPC("winGameRPC", PhotonTargets.All); // *
-        }
-        else
-        {
-            // Make this character win
-            winGameRPC();
-        }
-    }
-
-    [PunRPC]
-    public void winGameRPC()
-    {
-        if (!winFlag && !loseFlag)
-        {
-            winFlag = true;
-            stopMoving();
-            Instantiate(Resources.Load("WinCanvas"));
-        }
+        stopMoving();
+        gameManagerBehavior.instance.winGame();
     }
 
     public void loseGame()
     {
+        stopMoving();
+        gameManagerBehavior.instance.loseGame();
+    }
+
+    public void addPoints(int pointsTMP = 10)
+    {
+        gameManagerBehavior.instance.addPoints(pointsTMP);
+    }
+
+    public void removePoints(int pointsTMP = 10)
+    {
+        gameManagerBehavior.instance.addPoints(-pointsTMP);
+    }
+
+    protected void setGoal(int goalPointsTMP)
+    {
+        gameManagerBehavior.instance.setGoal(goalPointsTMP);
+    }
+
+    public void setLevelTimer(int timerLength, bool makeRepeat = false)
+    {
+        gameManagerBehavior.instance.setTimer(timerLength, makeRepeat);
+    }
+
+    public void makeLevelTimerRepeat(bool makeRepeat)
+    {
+        gameManagerBehavior.instance.makeTimerRepeat(makeRepeat);
+    }
+
+    public void startLevelTimer()
+    {
+        gameManagerBehavior.instance.startTimer();
+    }
+
+    public void stopLevelTimer()
+    {
+        gameManagerBehavior.instance.stopTimer();
+    }
+
+    public bool levelTimeIsUp()
+    {
+        return gameManagerBehavior.instance.timeIsUp();
+    }
+
+    public bool levelTimerIsRunning()
+    {
+        return gameManagerBehavior.instance.timerIsRunning(); ;
+    }
+    #endregion
+
+    #region Timer
+    /* Should these be networked? There will be serious lag if they are. */
+    public void setTimer(int timerLength, bool makeRepeat = false)
+    {
+        timerMax = timerLength;
+        makeTimerRepeat(makeRepeat);
+    }
+
+    public void makeTimerRepeat(bool makeRepeat)
+    {
+        timerLoopFlag = makeRepeat;
+    }
+
+    public void startTimer()
+    {
+        Debug.Log("Start Timer");
+        timerRunningFlag = true;
+    }
+
+    public void stopTimer()
+    {
+        timerRunningFlag = false;
+    }
+
+    public bool timeIsUp()
+    {
+        // Event is consumed in update function
+        return timerFinishedFlag;
+    }
+
+    public bool timerIsRunning()
+    {
+        return timerRunningFlag;
+    }
+    #endregion
+
+    #region Creation / Deletion
+    // Note: This method only attatches scripts that are of coreObjectBehavior, NOT scripts that are of
+    //  corePlayerBehavior. The assumption is made that player creation is too complex of a task for students
+    //  to do in script.
+    public void createNewObject(string objectName)
+    {
+        // Check to see if they're continuously spawning the same object
+        //  This lets us avoid many time-consuming 'Find' calls
+        if (lastSpawned == null || lastSpawned.name != objectName)
+        {
+            lastSpawned = GameObject.Find(objectName);
+        }
+
+        if (lastSpawned != null)
+        {
+            GameObject newObj;
+            if (lastSpawned.GetComponent<PhotonView>() != null)
+            {
+                // Recreate object
+                newObj = PhotonNetwork.Instantiate(lastSpawned.GetComponent<SpawnScript>().prefabName,
+                                                    gameObject.transform.position, gameObject.transform.rotation, 0);
+                newObj.transform.localScale = lastSpawned.transform.localScale;
+
+                // Attatch relevant scripts
+                MonoBehaviour[] scriptsOnObject = lastSpawned.GetComponents<coreObjectsBehavior>();
+                foreach (MonoBehaviour script in scriptsOnObject)
+                {
+                    newObj.AddComponent(script.GetType());
+                }
+
+                // Fix color
+                Color nColor = lastSpawned.GetComponent<Renderer>().material.color;
+                coreObjectsBehavior nBehavior = newObj.GetComponent<coreObjectsBehavior>();
+                if (nBehavior != null)
+                {
+                    nBehavior.changeColor(nColor.r, nColor.g, nColor.b);
+                }
+            }
+            else
+            {
+                Instantiate(lastSpawned, gameObject.transform.position, gameObject.transform.rotation);
+            }
+        }
+
+    }
+    #endregion
+
+    #region Display Text
+    public void setText(string text)
+    {
         if (pV != null)
         {
             // This file PunRPC
-            pV.RPC("loseGameRPC", PhotonTargets.All); // *
+            pV.RPC("setTextRPC", PhotonTargets.All, text); // *
         }
         else
         {
-            // Make this character win
-            loseGameRPC();
+            // Set this object's text
+            setTextRPC(text);
         }
     }
 
     [PunRPC]
-    public void loseGameRPC()
+    public void setTextRPC(string text)
     {
-        if (!winFlag && !loseFlag)
-        {
-            loseFlag = true;
-            stopMoving();
-            Instantiate(Resources.Load("LoseCanvas"));
-        }
+        if (objText == null)
+            createText();
+
+        objText.text = text;
     }
 
-    // Does this need to be networked, or will we allow the server to dictate the win conditions,
-    //  and therefore just let the server call winGame?
-    // Will we need the goal for any kind of counter?
-    // Should students program in the goal on their own?
-    protected void setGoal(int goalPointsTMP)
+    private void createText()
     {
-        goalPoints = goalPointsTMP;
+        GameObject objTextGO = new GameObject();
+        objTextGO.transform.parent = gameObject.transform;
+        objTextGO.transform.localPosition = new Vector3(0, gameObject.transform.localScale.y, 0);
+        objText = objTextGO.AddComponent<TextMesh>();
+        objText.anchor = TextAnchor.LowerCenter;
     }
-
-    /* =========================================== */
     #endregion
 }
