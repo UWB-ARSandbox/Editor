@@ -11,6 +11,7 @@ public class coreCharacterBehavior : MonoBehaviour
 
     // Flags
     protected bool startupFlag = true;
+    protected bool clickMoveFlag = false;
     protected bool isMovingFlag = false;
     protected bool isJumpingFlag = false;
     protected bool timerRunningFlag = false;
@@ -18,6 +19,9 @@ public class coreCharacterBehavior : MonoBehaviour
     protected bool timerLoopFlag = false;
 
     // Dynamic Variables
+    private Vector3 destPoint;
+    private float clickMovementSpeed = 10.0f;
+    private float yAxis;
     protected sizes characterSize = sizes.normal;
     private GameObject lastSpawned = null;
     private TextMesh objText = null;
@@ -38,6 +42,8 @@ public class coreCharacterBehavior : MonoBehaviour
 
         startMethod = this.GetType().GetMethod("buildGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
         updateMethod = this.GetType().GetMethod("updateGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
+
+        yAxis = gameObject.transform.position.y - gameObject.transform.localScale.y;
     }
 
     // Update is called once per frame
@@ -65,8 +71,56 @@ public class coreCharacterBehavior : MonoBehaviour
             updateMethod.Invoke(this, new object[0]);
         }
 
+        if(clickMoveFlag)
+        {
+            //check if the screen is touched / clicked   
+            if ((Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) || (Input.GetMouseButton(0)))
+            {
+                //declare a variable of RaycastHit struct
+                RaycastHit hit;
 
-        if (isMovingFlag)
+                //Create a Ray on the tapped / clicked position
+                Ray ray;
+
+                //for unity editor
+                #if UNITY_EDITOR
+                    ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                //for touch device
+                #elif (UNITY_ANDROID || UNITY_IPHONE || UNITY_WP8)
+                    ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
+                #endif
+
+                //Check if the ray hits any collider
+                if (Physics.Raycast(ray, out hit))
+                {
+                    //set a flag to indicate to move the gameobject
+                    isMovingFlag = true;
+                    //save the click / tap position
+                    destPoint = hit.point;
+                    //as we do not want to change the y axis value based on touch position, reset it to original y axis value
+                    destPoint.y = yAxis;
+                    Debug.Log(destPoint);
+                }
+
+            }
+
+            //check if the flag for movement is true and the current gameobject position is not same as the clicked / tapped position
+            //if (flag && !Mathf.Approximately(gameObject.transform.position.magnitude/512, endPoint.magnitude/512))
+            if (isMovingFlag && Vector2.Distance(gameObject.transform.position, destPoint) > 1)
+            { //&& !(V3Equal(transform.position, endPoint))){
+              //move the gameobject to the desired position
+                gameObject.transform.position = Vector3.Lerp(gameObject.transform.position, destPoint, 1 / (clickMovementSpeed * (Vector3.Distance(gameObject.transform.position, destPoint))));
+            }
+
+            //set the movement indicator flag to false if the endPoint and current gameobject position are equal
+            // else if (flag && Mathf.Approximately(gameObject.transform.position.magnitude / 512, endPoint.magnitude / 512))
+            else if (isMovingFlag)
+            {
+                isMovingFlag = false;
+                Debug.Log("I am here");
+            }
+        }
+        else if (isMovingFlag)
         {
             transform.Translate(Vector3.forward * Time.deltaTime * speed);
         }
@@ -103,16 +157,21 @@ public class coreCharacterBehavior : MonoBehaviour
     #endregion
 
     #region Movement
-    protected void moveForward(int speedTMP = 5)
+    public void moveForward(int speedTMP = 5)
     {
         speed = speedTMP;
         isMovingFlag = true;
     }
 
-    protected void stopMoving()
+    public void stopMoving()
     {
 
         isMovingFlag = false;
+    }
+
+    public void setClickToMove(bool clickToMove)
+    {
+        clickMoveFlag = clickToMove;
     }
 
     public bool isMoving()

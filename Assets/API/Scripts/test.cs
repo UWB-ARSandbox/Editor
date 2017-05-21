@@ -9,7 +9,8 @@ public class test : coreCharacterBehavior {
 	void buildGame ()
     {
 		setGoal (10);
-	}
+
+    }
 
     // Update is called once per frame
     void updateGame()
