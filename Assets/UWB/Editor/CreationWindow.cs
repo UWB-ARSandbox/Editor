@@ -535,23 +535,23 @@ public class CreationWindow : EditorWindow
             spawnScript.prefabName = "Physic" + prefabName; // Ensure the proper prefab name for client download
             obj.name = "Physic" + obj.name; // For convience, also change 
         }
-        else
-        {
-            UWBPhotonTransformView objTview = obj.GetComponent<UWBPhotonTransformView>();
-            if (objTview == null)
-                objTview = obj.AddComponent<UWBPhotonTransformView>(); // Attatch this and a PhotonView
-            objTview.enableSyncPos(); // These are all off by default
-            objTview.enableSyncRot(); // 
-            objTview.enableSyncScale(); //
-        }
+        
+
+        UWBPhotonTransformView objTview = obj.GetComponent<UWBPhotonTransformView>();
+        if (objTview == null)
+            objTview = obj.AddComponent<UWBPhotonTransformView>(); // Attatch this and a PhotonView
+        objTview.enableSyncPos(); // These are all off by default
+        objTview.enableSyncRot(); // 
+        objTview.enableSyncScale(); //
+        
 
         PhotonView objPview = obj.GetComponent<PhotonView>();
         objPview.ObservedComponents = new List<Component>(); // Make sure we're observing this object
 
-        if(physicalObject)
+        // Attatch physics component
+        objPview.ObservedComponents.Add(obj.GetComponent<Transform>());
+        if (physicalObject)
             objPview.ObservedComponents.Add(obj.GetComponent<Rigidbody>());
-        else
-            objPview.ObservedComponents.Add(obj.GetComponent<Transform>());
 
         objPview.synchronization = ViewSynchronization.UnreliableOnChange; // Default
         objPview.ownershipTransfer = OwnershipOption.Takeover;
