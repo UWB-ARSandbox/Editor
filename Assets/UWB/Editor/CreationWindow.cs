@@ -513,7 +513,8 @@ public class CreationWindow : EditorWindow
     {
         if (Selection.activeTransform != null)
         {
-            obj.transform.parent = Selection.activeTransform;
+            // Eliminates parent-child relationship, still allows initial position to be the same 
+            //obj.transform.parent = Selection.activeTransform;
             obj.transform.position = Selection.activeTransform.position;
         }
         else
