@@ -14,7 +14,8 @@ public class UWBPhotonTransformViewEditor : Editor
         script = (UWBPhotonTransformView) target;
 
         if(script.gameObject.GetComponent<Renderer>() == null ||
-           script.gameObject.GetComponent<Renderer>().sharedMaterial == null)
+           script.gameObject.GetComponent<Renderer>().sharedMaterial == null ||
+           script.gameObject.GetComponent<Renderer>().sharedMaterial.HasProperty("_Color") == false)
         {
             skipColor = true;
             return;
