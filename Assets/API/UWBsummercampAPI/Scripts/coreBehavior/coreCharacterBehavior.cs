@@ -174,6 +174,19 @@ public class coreCharacterBehavior : MonoBehaviour
         clickMoveFlag = clickToMove;
     }
 
+    [PunRPC]
+    public void setDestinationRPC(Vector3 position)
+    {
+        if (clickMoveFlag)
+        {
+            isMovingFlag = true;
+            //save the click / tap position
+            destPoint = position;
+            //as we do not want to change the y axis value based on touch position, reset it to original y axis value
+            destPoint.y = yAxis;
+        }
+    }
+
     public bool isMoving()
     {
         return isMovingFlag;

@@ -43,7 +43,7 @@ namespace UWBNetworkingPackage.ViveDemo
         public override void OnJoinedRoom()
         {
             _head = PhotonNetwork.Instantiate(ViveHeadObject.name, Vector3.zero, Quaternion.identity, 0);
-            //_head.GetComponent<Renderer>().enabled = false;
+            _head.GetComponent<Renderer>().enabled = false;
             _instantiated = true;
         }
 

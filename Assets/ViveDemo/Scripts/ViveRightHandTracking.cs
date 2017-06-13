@@ -45,7 +45,7 @@ namespace UWBNetworkingPackage.ViveDemo
         public override void OnJoinedRoom()
         {
             _rightHand = PhotonNetwork.Instantiate(ViveRightHandObject.name, Vector3.zero, Quaternion.identity, 0);
-            //_rightHand.GetComponent<Renderer>().enabled = false;
+            _rightHand.GetComponent<Renderer>().enabled = false;
             _instantiated = true;
         }
 
