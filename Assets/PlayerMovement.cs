@@ -6,14 +6,14 @@ public class PlayerMovement : coreCharacterBehavior {
 	// of the game
 	void buildGame () {
 
-		setGoal (20);
-		moveForward ();	
+		setGoal (10);
+
 	}
 	
 	// updateGame() is called many times per
 	// second
 	void updateGame () {
-		
+		moveForward ();	
 	}
 	
 }
