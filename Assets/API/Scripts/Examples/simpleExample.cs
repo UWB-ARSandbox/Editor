@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class test : coreCharacterBehavior {
+public class simpleExample : coreCharacterBehavior {
 
 
 	// Use this for initialization
