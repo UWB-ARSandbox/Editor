@@ -80,7 +80,7 @@ public class coreCharacterBehavior : MonoBehaviour
                 RaycastHit hit;
 
                 //Create a Ray on the tapped / clicked position
-                Ray ray;
+				Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
                 //for unity editor
                 #if UNITY_EDITOR

@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class networkManagerSummerCamp : PunBehaviour {
 
+	public bool HostGame = false;
+	public string RoomName = "UWBSummerCamp";
 
 
 	// Use this for initialization
@@ -12,7 +14,8 @@ public class networkManagerSummerCamp : PunBehaviour {
 	{
 		PhotonNetwork.autoJoinLobby = false;
 		PhotonNetwork.automaticallySyncScene = true;
-		PhotonNetwork.ConnectUsingSettings("1");
+//		PhotonNetwork.ConnectUsingSettings("1");
+		PhotonNetwork.ConnectToMaster ("172.21.209.145", 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
 	
 	}
 
@@ -28,7 +31,12 @@ public class networkManagerSummerCamp : PunBehaviour {
 
 
 		Debug.Log("OnConnectedToMaster() was called by PUN");
-		PhotonNetwork.CreateRoom ("SummerCampTest");
+
+		if (HostGame) {
+			PhotonNetwork.CreateRoom (RoomName);
+		} else {
+			PhotonNetwork.JoinRoom (RoomName);
+		}
 
 	}
 
