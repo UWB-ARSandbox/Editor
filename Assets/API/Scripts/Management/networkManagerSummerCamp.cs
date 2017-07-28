@@ -3,7 +3,7 @@ using Photon;
 using UnityEngine;
 //using UnityEditor;
 
-public class networkmanagertest : PunBehaviour {
+public class networkManagerSummerCamp : PunBehaviour {
 
 
 
