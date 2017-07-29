@@ -3,7 +3,6 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
-using UWBNetworkingPackage;
 using UnityEngine.SceneManagement;
 using UnityEditor.SceneManagement;
 using UWBsummercampAPI;
@@ -36,7 +35,7 @@ public class CreationWindow : EditorWindow
 
 
     // Network Variables
-    static NetworkManager netManager;
+	static networkManagerSummerCamp netManager;
     static string roomName;
     static bool isServer;
 
@@ -98,10 +97,10 @@ public class CreationWindow : EditorWindow
     void RefreshNetworkManager()
     {
         // If we've changed our network manager's settings
-        if (netManager != null && (!netManager.RoomName.Equals(roomName) || netManager.MasterClient != isServer))
+		if (netManager != null && (!netManager.RoomName.Equals(roomName) || netManager.HostGame != isServer))
         {
             netManager.RoomName = roomName;
-            netManager.MasterClient = isServer;
+            netManager.HostGame = isServer;
             EditorUtility.SetDirty(netManager); // Fairly expensive operation
         }
         else // Find our network manager component in the scene
@@ -109,14 +108,18 @@ public class CreationWindow : EditorWindow
             GameObject netManObj = GameObject.Find("NetworkManager");
             if (netManObj != null)
             {
-                netManager = netManObj.GetComponent<NetworkManager>();
+				netManager = netManObj.GetComponent<networkManagerSummerCamp>();
                 roomName = netManager.RoomName;
-                isServer = netManager.MasterClient;
+                isServer = netManager.HostGame;
             }
             else
             {
-                roomName = "<N/A>";
-                isServer = false;
+				netManObj = new GameObject ();
+				netManObj.name = "NetworkManager";
+				netManObj.AddComponent<networkManagerSummerCamp> ();
+				netManager = netManObj.GetComponent<networkManagerSummerCamp>();
+				roomName = netManager.RoomName;
+				isServer = netManager.HostGame;
             }
         }
         RefreshNetworkConnection();

@@ -11,7 +11,7 @@ public class jumpperBehaviour : coreObjectsBehavior
 	// Use this for initialization
 	void buildGame ()
     {
-		Debug.Log ("AQUIIIII :  |"+this.GetType().FullName + "|END");
+
 
 	}
 	
