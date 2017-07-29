@@ -7,6 +7,7 @@ using UWBNetworkingPackage;
 using UnityEngine.SceneManagement;
 using UnityEditor.SceneManagement;
 
+
 [InitializeOnLoad]
 public class CreationWindow : EditorWindow
 {
@@ -19,8 +20,17 @@ public class CreationWindow : EditorWindow
     static Scene selectedScene;
     static int selectedSceneIdx;
     static int newSceneIdx;
-    static string scenePath = "API/UWBsummercampAPI/Scenes/";
+	static string scenePath = "API/UWBsummercampAPI/Scenes/";
     static string[] sceneNames;// = new string[] { "1DemoScene", "2DemoScene", "3DemoSceneSmallBig" };
+
+	//Scripts Handle
+	//static Scene selectedScene;
+	static int selectedScriptIdx ;
+	static int newScriptIdx ;
+	static string customScriptsPath = "API/UWBsummercampAPI/CustomScripts/";
+	static string[] customScriptNames;
+
+
 
     // Network Variables
     static NetworkManager netManager;
@@ -30,11 +40,13 @@ public class CreationWindow : EditorWindow
     // Folding sections
     static bool objectFold = true;
     static bool scriptFold = true;
-    static bool levelFold = true;
+    static bool levelFold = false;
     static bool networkFold = true;
     static bool createSettingsFold = true;
     static bool primitiveObjFold = true;
     static bool customObjFold = true;
+	static bool customScriptsFold = true;
+
 
     // GUI Specific variables
     static string networkStatus;
@@ -70,6 +82,7 @@ public class CreationWindow : EditorWindow
         selectedScene = EditorSceneManager.GetActiveScene();
 
         RefreshSceneNames();
+		RefreshScriptNames ();
     }
 
     // This happens more than once, including when the play button is pressed but 
@@ -189,6 +202,32 @@ public class CreationWindow : EditorWindow
         }
     }
 
+	void RefreshScriptNames()
+	{
+		string searchFolders = "Assets/" + customScriptsPath.TrimEnd('/');
+	//	string[] guids = AssetDatabase.FindAssets("t:Scene", searchFolders);
+
+
+
+		DirectoryInfo dir = new DirectoryInfo(searchFolders);
+		FileInfo[] info = dir.GetFiles("*.cs");
+
+		customScriptNames = new string[info.Length+1];
+		customScriptNames [0] = "No Script Selected";
+
+		for (int i = 0; i < info.Length; i++)
+		{
+			customScriptNames[i+1] = info[i].Name.Trim('.','c','s');
+		
+		}
+
+
+
+
+	}
+
+
+
     // This ensures the menu will update whenever an object
     //  would normally update. This means that object names
     //  and scripts update properly.
@@ -263,10 +302,52 @@ public class CreationWindow : EditorWindow
 
             if(selectedScript == null && selectedObject != null)
             {
-                if(GUILayout.Button("Create Script"))
-                {
-                    NewScriptWindow.Init(selectedObject);
-                }
+
+				if(GUILayout.Button("Create Script"))
+				{
+					NewScriptWindow.Init(selectedObject);
+				}
+
+
+
+
+
+//				EditorGUILayout.Space();
+
+				#region Custom Objects Menu
+				customScriptsFold = EditorGUILayout.Foldout(customScriptsFold, "Custom Scripts", true);
+				if (customScriptsFold)
+				{
+
+//						NewScriptWindow.Init(selectedObject);
+
+
+					GUILayout.BeginVertical(EditorStyles.helpBox);
+//					newScriptIdx = EditorGUILayout.Popup("Select Custom Script", 0, customScriptNames);
+
+							
+					selectedScriptIdx = EditorGUILayout.Popup( "Select Custom Script", newScriptIdx, customScriptNames);
+
+					if(newScriptIdx != selectedScriptIdx)
+					{
+						
+						//System.Type tmpCustomClass = System.Type.GetType("MonoBehaviour.coreObjectsBehavior."+"jumpBlock", false, true);
+
+						//string tmpFullName = typeof("jumpBlock").FullName;
+
+						//Debug.Log("MonoBehaviour.coreObjectsBehavior+"+customScriptNames[selectedScriptIdx]);
+						//ChangeScene();
+						//Debug.Log(customScriptNames[selectedScriptIdx]) ;
+						//selectedObject.AddComponent( Type.GetType("coreObjectsBehavior."+customScriptNames[selectedScriptIdx])) ;
+						//selectedObject.AddComponent(testra
+					}
+					EditorGUILayout.Space();
+					GUILayout.EndVertical();
+					
+				}
+				#endregion
+
+
             }
             else if(selectedScript != null)
             {
@@ -342,7 +423,7 @@ public class CreationWindow : EditorWindow
             EditorGUILayout.Space();
             GUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Enable Physics");
-            physicalObject = EditorGUILayout.Toggle(physicalObject);
+            physicalObject  = EditorGUILayout.Toggle(physicalObject);
             GUILayout.EndHorizontal();
             EditorGUILayout.Space();
             GUILayout.EndVertical();

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class jumpperBehaviour : coreObjectsBehavior
 {
@@ -8,6 +9,7 @@ public class jumpperBehaviour : coreObjectsBehavior
 	// Use this for initialization
 	void buildGame ()
     {
+		Debug.Log ("AQUIIIII :  |"+this.GetType().FullName + "|END");
 
 	}
 	
