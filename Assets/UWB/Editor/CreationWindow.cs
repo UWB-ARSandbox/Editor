@@ -330,7 +330,15 @@ public class CreationWindow : EditorWindow
 
 					if(newScriptIdx != selectedScriptIdx)
 					{
-						
+					//this works!!	
+					 //	selectedObject.AddComponent<jumpBlock>();
+
+
+
+						//Debug.Log( typeof(jumpBlock).AssemblyQualifiedName);
+
+						selectedObject.AddComponent(  System.Type.GetType(customScriptNames[selectedScriptIdx]+", Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"));     //("coreObjectsBehavior."+customScriptNames[selectedScriptIdx]))
+
 						//System.Type tmpCustomClass = System.Type.GetType("MonoBehaviour.coreObjectsBehavior."+"jumpBlock", false, true);
 
 						//string tmpFullName = typeof("jumpBlock").FullName;
