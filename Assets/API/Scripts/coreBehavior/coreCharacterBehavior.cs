@@ -34,6 +34,7 @@ public class coreCharacterBehavior : MonoBehaviour
     protected int speed;
     private float timer = 0;
     private int timerMax = 10;
+	private gameManagerBehavior GameManager;
 
     // Constant Variables
     PhotonView pV;
@@ -45,6 +46,23 @@ public class coreCharacterBehavior : MonoBehaviour
     void Start()
     {
         pV = transform.GetComponent<PhotonView>();
+			if (pV == null) {
+
+				pV = this.gameObject.AddComponent<PhotonView> ();
+
+			}
+
+
+
+			GameObject _GameManager = GameObject.Find("GameManager");
+			if (_GameManager == null){
+				_GameManager = new GameObject ();
+				_GameManager.name = "GameManager";
+				_GameManager.AddComponent<gameManagerBehavior> ();
+			}
+			GameManager = _GameManager.GetComponent<gameManagerBehavior>();
+		
+
 
         startMethod = this.GetType().GetMethod("buildGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
         updateMethod = this.GetType().GetMethod("updateGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);

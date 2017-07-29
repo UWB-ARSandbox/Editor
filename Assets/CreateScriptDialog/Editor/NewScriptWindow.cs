@@ -33,7 +33,7 @@ public class NewScriptWindow : EditorWindow
 	private bool m_IsCustomEditor = false;
 	private bool m_FocusTextFieldNow = true;
 	private GameObject m_GameObjectToAddTo;
-	private string m_Directory = string.Empty;
+	private string m_Directory = "API/UWBsummercampAPI/CustomScripts";
 	private Vector2 m_PreviewScroll;
 	private Vector2 m_OptionsScroll;
 	private bool m_ClearKeyboardControl = false;
@@ -101,11 +101,11 @@ public class NewScriptWindow : EditorWindow
 		if (m_IsEditorClass)
 		{
 			if (InvalidTargetPathForEditorScript ())
-				m_Directory = Path.Combine (m_Directory, "Editor");
+				m_Directory = "API/UWBsummercampAPI/CustomScripts";
 		}
 		else if (m_Directory.EndsWith ("Editor"))
 		{
-			m_Directory = m_Directory.Substring (0, m_Directory.Length-6).TrimEnd (kPathSepChars);
+			m_Directory = "API/UWBsummercampAPI/CustomScripts";
 		}
 		
 		// Move keyboard focus to relevant field
@@ -812,7 +812,7 @@ public class NewScriptWindow : EditorWindow
 	
 	private void TargetPathGUI ()
 	{
-		m_Directory = EditorGUILayout.TextField ("Save in", m_Directory, GUILayout.ExpandWidth (true));
+		m_Directory = "API/UWBsummercampAPI/CustomScripts";
 		
 		HelpField ("Click a folder in the Project view to select.");
 	}
