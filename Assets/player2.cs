@@ -1,4 +1,6 @@
 using UnityEngine;
+using UWBsummercampAPI;
+
 
 public class player2 : coreCharacterBehavior {
 	

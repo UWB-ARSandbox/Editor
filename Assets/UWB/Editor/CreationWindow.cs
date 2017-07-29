@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using UWBNetworkingPackage;
 using UnityEngine.SceneManagement;
 using UnityEditor.SceneManagement;
+using UWBsummercampAPI;
+
+
 
 
 [InitializeOnLoad]
@@ -330,24 +333,9 @@ public class CreationWindow : EditorWindow
 
 					if(newScriptIdx != selectedScriptIdx)
 					{
-					//this works!!	
-					 //	selectedObject.AddComponent<jumpBlock>();
 
+						selectedObject.AddComponent(  System.Type.GetType(customScriptNames[selectedScriptIdx]+", Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"));    
 
-
-						//Debug.Log( typeof(jumpBlock).AssemblyQualifiedName);
-
-						selectedObject.AddComponent(  System.Type.GetType(customScriptNames[selectedScriptIdx]+", Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"));     //("coreObjectsBehavior."+customScriptNames[selectedScriptIdx]))
-
-						//System.Type tmpCustomClass = System.Type.GetType("MonoBehaviour.coreObjectsBehavior."+"jumpBlock", false, true);
-
-						//string tmpFullName = typeof("jumpBlock").FullName;
-
-						//Debug.Log("MonoBehaviour.coreObjectsBehavior+"+customScriptNames[selectedScriptIdx]);
-						//ChangeScene();
-						//Debug.Log(customScriptNames[selectedScriptIdx]) ;
-						//selectedObject.AddComponent( Type.GetType("coreObjectsBehavior."+customScriptNames[selectedScriptIdx])) ;
-						//selectedObject.AddComponent(testra
 					}
 					EditorGUILayout.Space();
 					GUILayout.EndVertical();

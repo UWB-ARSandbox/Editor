@@ -4,6 +4,12 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
+
+
+
+namespace UWBsummercampAPI {
+
+
 public class coreCharacterBehavior : MonoBehaviour
 {
     // Enums
@@ -553,4 +559,7 @@ public class coreCharacterBehavior : MonoBehaviour
         objText.anchor = TextAnchor.LowerCenter;
     }
     #endregion
+}
+
+
 }

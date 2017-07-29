@@ -4,6 +4,11 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
+
+
+namespace UWBsummercampAPI {
+
+
 public class coreObjectsBehavior : MonoBehaviour
 {
     // Flags
@@ -652,4 +657,6 @@ public class coreObjectsBehavior : MonoBehaviour
         objText.anchor = TextAnchor.LowerCenter;
     }
     #endregion
+}
+
 }

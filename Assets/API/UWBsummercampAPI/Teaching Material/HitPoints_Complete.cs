@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UWBsummercampAPI;
 
 public class HitPoints_Complete : coreObjectsBehavior {
 	//Insert Variable Here

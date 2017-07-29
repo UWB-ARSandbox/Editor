@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+namespace UWBsummercampAPI{
+	
 public class gameManagerBehavior : MonoBehaviour
 {
     // Flags
@@ -187,4 +190,6 @@ public class gameManagerBehavior : MonoBehaviour
         return timerRunningFlag;
     }
     #endregion
+}
+
 }
