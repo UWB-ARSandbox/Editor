@@ -1,7 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using Hashtable = ExitGames.Client.Photon.Hashtable;
+//using Photon;
 
 namespace UWBsummercampAPI{
 	
@@ -19,21 +20,63 @@ public class gameManagerBehavior : MonoBehaviour
     protected static int goalPoints;
     private float timer = 0;
     private int timerMax = 10;
+	private bool isGameRunning;
 
     // Constant Variables
     public static gameManagerBehavior instance;
-    static PhotonView pV;
-
+		static PhotonView pV = new PhotonView();
+		static PhotonPlayer pP = new PhotonPlayer(true,0,"localCOmputer");
+	private Hashtable gameBuffer = new Hashtable();
     // Use this for initialization
     void Start ()
     {
         points = 0;
         goalPoints = 999999;
+		
         
         instance = this;
-        pV = transform.GetComponent<PhotonView>();
+
+
+
+
+			updateLocalCache("goalPoints");
+			updateGlobalCache ();
+
+
     }
 	
+
+		//move file down
+		void updateLocalCache(string key){
+
+
+			object tmpBuffer;
+			if (pP.customProperties.TryGetValue(key, out tmpBuffer))
+				{
+				gameBuffer[key] = (int)tmpBuffer;
+				}
+
+
+
+		}
+
+
+		void updateGlobalCache (){
+
+			//Hashtable score = new Hashtable();  // using PUN's implementation of Hashtable
+			//score[PunPlayerScores.PlayerScoreProp] = newScore;
+
+			//gameBuffer[string] = KeyValuePair;
+
+
+			pP.SetCustomProperties(gameBuffer);
+
+
+
+		}
+
+
+
 	// Update is called once per frame
 	void Update ()
     {
@@ -152,6 +195,7 @@ public class gameManagerBehavior : MonoBehaviour
     public void setGoal(int goalPointsTMP)
     {
         goalPoints = goalPointsTMP;
+			updateGlobalCache ();
     }
     #endregion
 

@@ -7,6 +7,9 @@ public class networkManagerSummerCamp : PunBehaviour {
 
 	public bool HostGame = false;
 	public string RoomName = "UWBSummerCamp";
+	public int teamID = 0;
+	public string teamName = "Observer";
+
 
 
 	// Use this for initialization

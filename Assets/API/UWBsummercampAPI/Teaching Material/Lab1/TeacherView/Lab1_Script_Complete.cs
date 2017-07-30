@@ -18,5 +18,6 @@ public class Lab1_Script_Complete : coreCharacterBehavior {
 	void updateGame () {
 		//Insert Code Here
 
+
 	}
 }
