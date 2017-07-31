@@ -26,12 +26,13 @@ namespace UWBsummercampAPI{
     // Constant Variables
     public static gameManagerBehavior instance;
 	static PhotonView pV;//= this.gameObject.AddComponent<PhotonView>();
-	static PhotonPlayer pP = new PhotonPlayer(true,0,"localCOmputer");
+	static PhotonPlayer pP = new PhotonPlayer(true,0,"PhotonPlayer");
 	static networkManagerSummerCamp NetworkManager;
 	private Hashtable gameBuffer = new Hashtable();
 	
 	private int myTeamID = 0;
 	private bool firstUpdate = true;
+		private bool readyToStart = false;
 	private bool customPropertyChanged = false;
 
 
@@ -71,14 +72,13 @@ namespace UWBsummercampAPI{
 
 
 			if (NetworkManager.HostGame) {
+				requestDBsync ();
 				goalPoints = NetworkManager.goal;
 				updateCache (myTeamID.ToString () + "Points", 0);
 				updateCache ("goalPoints", goalPoints);
-				updateCache ("Inicialized", 1);
 
 				points = 0;
-
-
+				readyToStart = true;
 
 			} 
 
@@ -101,7 +101,7 @@ namespace UWBsummercampAPI{
 
 	// Update is called once per frame
 	void Update ()
-    {
+		{
 
 
 
@@ -111,42 +111,57 @@ namespace UWBsummercampAPI{
 
 			canvasText.text = "";
 			if (Input.GetKeyDown (KeyCode.Space)) {
-				setGoal (22);
+				//setGoal (22);
+
 				Debug.Log ("BUFFEERRR RAW: ");
-				Debug.Log (pP.customProperties.ToString());
+				Debug.Log (pP.customProperties.ToString ());
 				Debug.Log ("BUFFEERRR: ");
 				Debug.Log (gameBuffer);
+
 			}
 
-			canvasText.text = "myTeam: "+myTeamID+"\n Goal: "+goalPoints+"\n Points: "+points;
+			canvasText.text = "myTeam: " + myTeamID + "\n Goal: " + goalPoints + "\n Points: " + points;
 
 			//Tmp for dev finished
 
 
 
 			//fix networking:
-			if (firstUpdate && customPropertyChanged) {
-				List<Component> tmpList = new List<Component>();
+			if (firstUpdate && NetworkManager.isConnected()) {
+				List<Component> tmpList = new List<Component> ();
 				tmpList.Add (this.gameObject.GetComponent<gameManagerBehavior> ());
 				pV.ObservedComponents = tmpList;
+				requestDBsync ();
+				firstUpdate = false;
+				addPoints (0, myTeamID);
 
 
-				if (!NetworkManager.HostGame) {
-					gameBuffer = pP.customProperties;
+			}
 
-					Debug.Log ("BUFFEERRR RAW: ");
-					Debug.Log (pP.customProperties.ToString());
-					Debug.Log ("BUFFEERRR: ");
-					Debug.Log (gameBuffer);
-					//				goalPoints = queryCache ("goalPoints");
-					//				points = queryCache (myTeamID.ToString () + "Points");
+			//finish inicializing game
+			if (readyToStart) {
 
 
+				try
+				{
+					goalPoints = queryCache ("goalPoints");
+					points = queryCache (myTeamID.ToString () + "Points");
+				}
+				catch (System.Exception e)
+				{
+					print(e.ToString());
+					addPoints (0, myTeamID);
 				}
 
 
-				firstUpdate = false;
+					
+
+
 			}
+		
+
+
+	
 
         if (points >= goalPoints)
         {
@@ -235,7 +250,14 @@ namespace UWBsummercampAPI{
     #region Points
 		public void addPoints(int pointsTMP = 10, int teamID = 0)
     {
-			int totalPoints = pointsTMP + queryCache (NetworkManager.teamID.ToString () + "Points");
+			int totalPoints = 0;
+			try{
+			totalPoints = pointsTMP + queryCache (NetworkManager.teamID.ToString () + "Points");
+			}
+			catch (System.Exception e)
+			{
+
+			}
 			updateCache (teamID.ToString () + "Points", totalPoints);
 
         if (pV != null)
@@ -257,12 +279,77 @@ namespace UWBsummercampAPI{
 				points = pointTotal;
 			}
 
+			if (NetworkManager.HostGame) {
+
+
+			}
 
 			Debug.Log("addpoints to "+teamID);
       //  points = pointTotal;
     }
 
     #endregion
+
+
+
+
+
+
+		#region Custom Memory Management
+
+		public bool requestDBsync()
+		{
+
+			if (pV != null)
+			{
+
+					pV.RPC ("syncDBRPC", PhotonTargets.All); // *
+					return true;
+				}
+
+
+			return false;
+
+		}
+
+
+		[PunRPC]
+		public bool syncDBRPC()
+		{
+
+			if (pV != null)
+			{
+
+
+				if (NetworkManager.HostGame) {
+					// This file PunRPC
+					pV.RPC ("updateDBRPC", PhotonTargets.All, gameBuffer); // *
+					return true;
+				}
+
+
+			}
+
+
+			return false;
+		}
+
+
+		[PunRPC]
+		public void updateDBRPC(Hashtable bufferTMP)
+		{
+			if (!NetworkManager.HostGame) {
+				gameBuffer = bufferTMP;
+				readyToStart = true;
+				Debug.Log ("buffer updated " + gameBuffer);
+			}
+		}
+
+
+
+
+		#endregion
+
 
 
 
@@ -378,8 +465,11 @@ namespace UWBsummercampAPI{
 
 	private void updateNetworkedCache (){
 
-
+			//custom properties not really working...
 			pP.SetCustomProperties(gameBuffer, gameBuffer);
+
+			//this is the workarouns custom properties issue.
+			syncDBRPC ();
 
 
 
