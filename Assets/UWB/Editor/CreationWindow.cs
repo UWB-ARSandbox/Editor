@@ -36,8 +36,11 @@ public class CreationWindow : EditorWindow
 
     // Network Variables
 	static networkManagerSummerCamp netManager;
-    static string roomName;
-    static bool isServer;
+    static string roomName = "";
+    static bool isServer = false;
+	static int teamID = 0;
+	static string teamName = "";
+	static int goalPoints = 0;
 
     // Folding sections
     static bool objectFold = true;
@@ -97,10 +100,13 @@ public class CreationWindow : EditorWindow
     void RefreshNetworkManager()
     {
         // If we've changed our network manager's settings
-		if (netManager != null && (!netManager.RoomName.Equals(roomName) || netManager.HostGame != isServer))
-        {
+		if (netManager != null && (!netManager.RoomName.Equals(roomName) || netManager.HostGame != isServer || netManager.teamID != teamID || netManager.teamName != teamName || netManager.goal != goalPoints) )
+		{
             netManager.RoomName = roomName;
             netManager.HostGame = isServer;
+			netManager.teamID = teamID;
+			netManager.teamName = teamName;
+			netManager.goal = goalPoints;
             EditorUtility.SetDirty(netManager); // Fairly expensive operation
         }
         else // Find our network manager component in the scene
@@ -109,6 +115,19 @@ public class CreationWindow : EditorWindow
             if (netManObj != null)
             {
 				netManager = netManObj.GetComponent<networkManagerSummerCamp>();
+
+				if (netManager == null) {
+					netManObj.AddComponent<networkManagerSummerCamp> ();
+					netManager = netManObj.GetComponent<networkManagerSummerCamp>();
+					try
+					{
+						DestroyImmediate(netManObj.GetComponent<UWBNetworkingPackage.NetworkManager>());
+					}
+					catch {
+					}
+
+
+				}
                 roomName = netManager.RoomName;
                 isServer = netManager.HostGame;
             }
@@ -401,7 +420,11 @@ public class CreationWindow : EditorWindow
             EditorGUILayout.LabelField("Server ");
             isServer = EditorGUILayout.Toggle(isServer);
             GUILayout.EndHorizontal();
-            roomName = EditorGUILayout.TextField("Room Name", roomName, EditorStyles.objectField);
+			roomName = EditorGUILayout.TextField("Room Name", roomName, EditorStyles.objectField);
+			teamID = EditorGUILayout.IntField("TeamID", teamID, EditorStyles.objectField);
+			roomName = EditorGUILayout.TextField("Team Name", teamName, EditorStyles.objectField);
+			goalPoints = EditorGUILayout.IntField("TeamID", goalPoints, EditorStyles.objectField);
+
 
             // Update Network manager settings
             //  OR find our network manager
