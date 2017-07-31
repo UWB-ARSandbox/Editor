@@ -9,6 +9,8 @@ public class networkManagerSummerCamp : PunBehaviour {
 	public string RoomName = "UWBSummerCamp";
 	public int teamID = 0;
 	public string teamName = "Observer";
+	public int goal = 99999;
+	private Room currentRoom;
 
 
 
@@ -19,14 +21,22 @@ public class networkManagerSummerCamp : PunBehaviour {
 		PhotonNetwork.automaticallySyncScene = true;
 //		PhotonNetwork.ConnectUsingSettings("1");
 		PhotonNetwork.ConnectToMaster ("172.21.209.145", 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
+
 	
 	}
 
 
+	public bool isConnected(){
+
+		return PhotonNetwork.inRoom;
+
+	}
 
 
+	public Room getRoom(){
 
-
+		return 	PhotonNetwork.room;
+	}
 
 
 	public override void OnConnectedToMaster()

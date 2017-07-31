@@ -35,6 +35,7 @@ public class coreCharacterBehavior : MonoBehaviour
     private float timer = 0;
     private int timerMax = 10;
 	private gameManagerBehavior GameManager;
+	private int teamID = 0;
 
     // Constant Variables
     PhotonView pV;
@@ -45,6 +46,8 @@ public class coreCharacterBehavior : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+
+
         pV = transform.GetComponent<PhotonView>();
 			if (pV == null) {
 
@@ -60,7 +63,10 @@ public class coreCharacterBehavior : MonoBehaviour
 				_GameManager.name = "GameManager";
 				_GameManager.AddComponent<gameManagerBehavior> ();
 			}
+		
+
 			GameManager = _GameManager.GetComponent<gameManagerBehavior>();
+
 		
 
 
@@ -68,11 +74,27 @@ public class coreCharacterBehavior : MonoBehaviour
         updateMethod = this.GetType().GetMethod("updateGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
 
         yAxis = gameObject.transform.position.y - gameObject.transform.localScale.y;
+
+
     }
 
     // Update is called once per frame
     void Update()
     {
+
+
+			//dev delete
+	
+			if (Input.GetKeyDown (KeyCode.M)) {
+				if (isMoving()) {
+					stopMoving ();
+				} else {
+					moveForward ();
+				}
+			}
+
+
+
         // Wait for the client to connect to the server before updating
         if (startupFlag && !isConnected())
         {
@@ -83,6 +105,9 @@ public class coreCharacterBehavior : MonoBehaviour
         }
         else if(startupFlag)
         {
+				//execute exactly once, to add team correctly (After GameManager been created)
+				teamID = GameManager.getTeam ();
+
             startupFlag = false;
             if (startMethod != null)
             {
@@ -189,7 +214,7 @@ public class coreCharacterBehavior : MonoBehaviour
 
     public void stopMoving()
     {
-
+			speed = 0;
         isMovingFlag = false;
     }
 
@@ -355,6 +380,35 @@ public class coreCharacterBehavior : MonoBehaviour
         return isJumpingFlag;
     }
 
+
+
+		#region Team Management
+
+		public void setTeam(int newTeam)
+		{
+			if (pV != null)
+			{
+				// This file PunRPC
+				pV.RPC("setTeamRPC", PhotonTargets.All, newTeam); // *
+			}
+			else
+			{
+				// Make player visible
+				setTeamRPC(newTeam);
+			}
+		}
+
+		[PunRPC]
+		public void setTeamRPC(int newTeam)
+		{
+			teamID = newTeam;
+		}
+
+
+		#endregion
+
+
+
     #region Visibility
     public void makeInvisible()
     {
@@ -417,12 +471,13 @@ public class coreCharacterBehavior : MonoBehaviour
 
     public void addPoints(int pointsTMP = 10)
     {
-        gameManagerBehavior.instance.addPoints(pointsTMP);
+			Debug.Log ("Character here ID: " + teamID.ToString ());
+			gameManagerBehavior.instance.addPoints(pointsTMP, teamID);
     }
 
     public void removePoints(int pointsTMP = 10)
     {
-        gameManagerBehavior.instance.addPoints(-pointsTMP);
+			gameManagerBehavior.instance.addPoints(-pointsTMP, teamID);
     }
 
     protected void setGoal(int goalPointsTMP)

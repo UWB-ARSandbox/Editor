@@ -17,7 +17,7 @@ public class Collectable : coreObjectsBehavior {
 	// second
 	void updateGame () {
 		if(playerIsTouching()){
-			givePoints (10);
+			givePoints (5);
 			destroyObject();
 		}
 

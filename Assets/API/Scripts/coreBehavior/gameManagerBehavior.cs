@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 //using Photon;
+using UnityEngine.UI;
 
 namespace UWBsummercampAPI{
 	
-public class gameManagerBehavior : MonoBehaviour
+	public class gameManagerBehavior : MonoBehaviour
 {
     // Flags
     protected static bool winFlag = false;
@@ -24,14 +25,67 @@ public class gameManagerBehavior : MonoBehaviour
 
     // Constant Variables
     public static gameManagerBehavior instance;
-		static PhotonView pV = new PhotonView();
-		static PhotonPlayer pP = new PhotonPlayer(true,0,"localCOmputer");
+	static PhotonView pV;//= this.gameObject.AddComponent<PhotonView>();
+	static PhotonPlayer pP = new PhotonPlayer(true,0,"localCOmputer");
+	static networkManagerSummerCamp NetworkManager;
 	private Hashtable gameBuffer = new Hashtable();
+	
+	private int myTeamID = 0;
+	private bool firstUpdate = true;
+	private bool customPropertyChanged = false;
+
+
+
+		//Tmp for dev (delete later)
+		private Text canvasText ;
+
+
+
+
     // Use this for initialization
     void Start ()
     {
-        points = 0;
-        goalPoints = 999999;
+			
+
+			//Tmp for dev (delete later)
+
+			canvasText = GameObject.Find("Canvas").GetComponentInChildren<Text> ();
+
+
+			//Tmp for dev finished
+
+
+			pV = gameObject.AddComponent<PhotonView> ();
+
+			pV.viewID = 99999;
+		
+
+
+			NetworkManager = GameObject.Find ("NetworkManager").GetComponent<networkManagerSummerCamp>();
+			myTeamID = NetworkManager.teamID;
+
+			//check with network manager if it's master.
+			//if it, so create networked hashtab
+			//otherwise, wuery it and populate local gameBuffer
+
+
+
+			if (NetworkManager.HostGame) {
+				goalPoints = NetworkManager.goal;
+				updateCache (myTeamID.ToString () + "Points", 0);
+				updateCache ("goalPoints", goalPoints);
+				updateCache ("Inicialized", 1);
+
+				points = 0;
+
+
+
+			} 
+
+
+
+
+
 		
         
         instance = this;
@@ -39,50 +93,64 @@ public class gameManagerBehavior : MonoBehaviour
 
 
 
-			updateLocalCache("goalPoints");
-			updateGlobalCache ();
+//read or create initial networked database
 
 
     }
 	
 
-		//move file down
-		void updateLocalCache(string key){
-
-
-			object tmpBuffer;
-			if (pP.customProperties.TryGetValue(key, out tmpBuffer))
-				{
-				gameBuffer[key] = (int)tmpBuffer;
-				}
-
-
-
-		}
-
-
-		void updateGlobalCache (){
-
-			//Hashtable score = new Hashtable();  // using PUN's implementation of Hashtable
-			//score[PunPlayerScores.PlayerScoreProp] = newScore;
-
-			//gameBuffer[string] = KeyValuePair;
-
-
-			pP.SetCustomProperties(gameBuffer);
-
-
-
-		}
-
-
-
 	// Update is called once per frame
 	void Update ()
     {
+
+
+
+
+			//Tmp for dev (delete later)
+
+
+			canvasText.text = "";
+			if (Input.GetKeyDown (KeyCode.Space)) {
+				setGoal (22);
+				Debug.Log ("BUFFEERRR RAW: ");
+				Debug.Log (pP.customProperties.ToString());
+				Debug.Log ("BUFFEERRR: ");
+				Debug.Log (gameBuffer);
+			}
+
+			canvasText.text = "myTeam: "+myTeamID+"\n Goal: "+goalPoints+"\n Points: "+points;
+
+			//Tmp for dev finished
+
+
+
+			//fix networking:
+			if (firstUpdate && customPropertyChanged) {
+				List<Component> tmpList = new List<Component>();
+				tmpList.Add (this.gameObject.GetComponent<gameManagerBehavior> ());
+				pV.ObservedComponents = tmpList;
+
+
+				if (!NetworkManager.HostGame) {
+					gameBuffer = pP.customProperties;
+
+					Debug.Log ("BUFFEERRR RAW: ");
+					Debug.Log (pP.customProperties.ToString());
+					Debug.Log ("BUFFEERRR: ");
+					Debug.Log (gameBuffer);
+					//				goalPoints = queryCache ("goalPoints");
+					//				points = queryCache (myTeamID.ToString () + "Points");
+
+
+				}
+
+
+				firstUpdate = false;
+			}
+
         if (points >= goalPoints)
         {
-            winGame();
+           // winGame();
         }
 
         // Consume timer event
@@ -165,39 +233,87 @@ public class gameManagerBehavior : MonoBehaviour
 #endregion
 
     #region Points
-    public void addPoints(int pointsTMP = 10)
+		public void addPoints(int pointsTMP = 10, int teamID = 0)
     {
-        int totalPoints = points + pointsTMP;
+			int totalPoints = pointsTMP + queryCache (NetworkManager.teamID.ToString () + "Points");
+			updateCache (teamID.ToString () + "Points", totalPoints);
 
         if (pV != null)
         {
             // This file PunRPC
-            pV.RPC("setPointsRPC", PhotonTargets.All, totalPoints); // *
+				pV.RPC("setPointsRPC", PhotonTargets.All, totalPoints, teamID); // *
         }
         else
         {
-            setPointsRPC(totalPoints);
+				setPointsRPC(totalPoints, teamID);
         }
     }
 
 
     [PunRPC]
-    public void setPointsRPC(int pointTotal)
+		public void setPointsRPC(int pointTotal, int teamID)
     {
-        Debug.Log("addpoints!!");
-        points = pointTotal;
+			if (teamID == myTeamID) {
+				points = pointTotal;
+			}
+
+
+			Debug.Log("addpoints to "+teamID);
+      //  points = pointTotal;
     }
 
-    // Does this need to be networked, or will we allow the server to dictate the win conditions,
-    //  and therefore just let the server call winGame?
-    // Will we need the goal for any kind of counter?
-    // Should students program in the goal on their own?
-    public void setGoal(int goalPointsTMP)
-    {
-        goalPoints = goalPointsTMP;
-			updateGlobalCache ();
-    }
     #endregion
+
+
+
+		#region Goals
+
+
+		public void setGoal(int goalTMP = 10)
+		{
+			int newGoal = goalTMP;
+
+			if (pV != null)
+			{
+				// This file PunRPC
+				pV.RPC("setGoalRPC", PhotonTargets.All, newGoal); // *
+			}
+			else
+			{
+				setGoalRPC(newGoal);
+			}
+		}
+
+
+		[PunRPC]
+		public void setGoalRPC(int newGoal)
+		{
+			Debug.Log("new Goal Set: "+newGoal);
+
+			//update local variable and networked cache
+			goalPoints = newGoal;
+			updateCache ("goalPoints", newGoal);
+
+
+		}
+
+		#endregion
+
+
+		#region Team
+		public int getTeam(){
+
+
+			return myTeamID;
+
+		}
+
+		#endregion
+
+
+
+
+
 
     #region Timer
     /* Should these be networked? There will be serious lag if they are. */
@@ -234,6 +350,53 @@ public class gameManagerBehavior : MonoBehaviour
         return timerRunningFlag;
     }
     #endregion
-}
 
+
+
+
+
+		#region Network Memory Management
+
+
+		private void updateCache(string key, int value){
+
+				gameBuffer[key] = value;
+			updateNetworkedCache ();
+
+		
+
+		}
+
+
+		private int queryCache(string key){
+
+
+			return (int) gameBuffer[key] ;
+			}
+
+
+
+	private void updateNetworkedCache (){
+
+
+			pP.SetCustomProperties(gameBuffer, gameBuffer);
+
+
+
+	}
+
+	//updates everytime customproperties are update on the network
+	//this force us to have a fresh local copy at every change 
+	public void OnPhotonPlayerPropertiesChanged(object[] playerAndUpdatedProps)
+	{
+
+			customPropertyChanged = true;
+			PhotonPlayer player = playerAndUpdatedProps[0] as PhotonPlayer;
+			gameBuffer = playerAndUpdatedProps[1] as Hashtable;
+
+	}
+	
+	#endregion
+
+	}
 }

@@ -8,19 +8,22 @@ using UWBsummercampAPI;
 
 public class simpleExample : coreCharacterBehavior {
 
-
+	public bool moving = false;
 	// Use this for initialization
 	void buildGame ()
     {
-		setGoal (10);
+		//setGoal (2);
 
     }
 
     // Update is called once per frame
     void updateGame()
     {
-		moveForward();
 
+
+		if (moving) {
+			moveForward ();
+		}
 	
         
 
