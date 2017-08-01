@@ -141,19 +141,15 @@ public class CreationWindow : EditorWindow
 	// If we've changed our network manager's settings
 	if (netManager != null && ( !(netManager.RoomName == roomName) || netManager.HostGame != isServer || !(netManager.teamID == teamID) || !(netManager.teamName == teamName) || !(netManager.goal == goalPoints) ))
 	{
-			Debug.Log ("Values Changed!!!!");
-			Debug.Log ("Room Name Manager: "+ netManager.RoomName);
-			Debug.Log ("Room Name Editor: "+ roomName);
+
 		netManager.RoomName = roomName;
 		netManager.HostGame = isServer;
 		netManager.teamID = teamID;
 		netManager.teamName = teamName;
 		netManager.goal = goalPoints; 
-		//EditorUtility.SetDirty(netManager); // Fairly expensive operation
+		EditorUtility.SetDirty(netManager); // Fairly expensive operation
 
-			Debug.Log ("AfterRoom Name Manager: "+ netManager.RoomName);
-			Debug.Log ("afterRoom Name Editor: "+ roomName);
-
+		
 	}
 
         RefreshNetworkConnection();
