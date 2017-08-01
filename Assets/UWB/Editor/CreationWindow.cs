@@ -31,16 +31,16 @@ public class CreationWindow : EditorWindow
 	static int newScriptIdx ;
 	static string customScriptsPath = "API/UWBsummercampAPI/CustomScripts/";
 	static string[] customScriptNames;
-
+	static bool justAwake = true;
 
 
     // Network Variables
 	static networkManagerSummerCamp netManager;
-    static string roomName = "";
-    static bool isServer = false;
-	static int teamID = 0;
-	static string teamName = "";
-	static int goalPoints = 0;
+	static string roomName ;
+	static bool isServer;
+	static int teamID ;
+	static string teamName;
+	static int goalPoints;
 
     // Folding sections
     static bool objectFold = true;
@@ -82,6 +82,7 @@ public class CreationWindow : EditorWindow
         networkStatusStyle.fontStyle = FontStyle.Bold;
         networkStatusStyle.normal.textColor = Color.black;
 
+		justAwake = true;
         RefreshNetworkManager();
 
         selectedScene = EditorSceneManager.GetActiveScene();
@@ -98,49 +99,63 @@ public class CreationWindow : EditorWindow
     }
 
     void RefreshNetworkManager()
-    {
-        // If we've changed our network manager's settings
-		if (netManager != null && (!netManager.RoomName.Equals(roomName) || netManager.HostGame != isServer || netManager.teamID != teamID || netManager.teamName != teamName || netManager.goal != goalPoints) )
-		{
-            netManager.RoomName = roomName;
-            netManager.HostGame = isServer;
-			netManager.teamID = teamID;
-			netManager.teamName = teamName;
-			netManager.goal = goalPoints;
-            EditorUtility.SetDirty(netManager); // Fairly expensive operation
-        }
-        else // Find our network manager component in the scene
-        {
-            GameObject netManObj = GameObject.Find("NetworkManager");
-            if (netManObj != null)
-            {
-				netManager = netManObj.GetComponent<networkManagerSummerCamp>();
+	{
+		GameObject netManObj = GameObject.Find ("NetworkManager");
 
-				if (netManager == null) {
-					netManObj.AddComponent<networkManagerSummerCamp> ();
-					netManager = netManObj.GetComponent<networkManagerSummerCamp>();
-					try
-					{
-						DestroyImmediate(netManObj.GetComponent<UWBNetworkingPackage.NetworkManager>());
-					}
-					catch {
-					}
+		if (netManObj != null) {
+			netManager = netManObj.GetComponent<networkManagerSummerCamp> ();
+
+			if (netManager == null) {
+				netManObj.AddComponent<networkManagerSummerCamp> ();
+				netManager = netManObj.GetComponent<networkManagerSummerCamp> ();
 
 
+				try {
+					DestroyImmediate (netManObj.GetComponent<UWBNetworkingPackage.NetworkManager> ());
+				} catch {
 				}
-                roomName = netManager.RoomName;
-                isServer = netManager.HostGame;
-            }
+
+
+			} else if (justAwake) {
+				roomName = netManager.RoomName ;
+				isServer = netManager.HostGame;
+				teamID = netManager.teamID;
+				teamName = netManager.teamName;
+				goalPoints = netManager.goal ; 
+				justAwake = false;
+			}
+		}
+               
+            
             else
             {
+
 				netManObj = new GameObject ();
 				netManObj.name = "NetworkManager";
 				netManObj.AddComponent<networkManagerSummerCamp> ();
 				netManager = netManObj.GetComponent<networkManagerSummerCamp>();
-				roomName = netManager.RoomName;
-				isServer = netManager.HostGame;
+
             }
-        }
+        
+
+	// If we've changed our network manager's settings
+	if (netManager != null && ( !(netManager.RoomName == roomName) || netManager.HostGame != isServer || !(netManager.teamID == teamID) || !(netManager.teamName == teamName) || !(netManager.goal == goalPoints) ))
+	{
+			Debug.Log ("Values Changed!!!!");
+			Debug.Log ("Room Name Manager: "+ netManager.RoomName);
+			Debug.Log ("Room Name Editor: "+ roomName);
+		netManager.RoomName = roomName;
+		netManager.HostGame = isServer;
+		netManager.teamID = teamID;
+		netManager.teamName = teamName;
+		netManager.goal = goalPoints; 
+		//EditorUtility.SetDirty(netManager); // Fairly expensive operation
+
+			Debug.Log ("AfterRoom Name Manager: "+ netManager.RoomName);
+			Debug.Log ("afterRoom Name Editor: "+ roomName);
+
+	}
+
         RefreshNetworkConnection();
     }
 
@@ -420,12 +435,12 @@ public class CreationWindow : EditorWindow
             EditorGUILayout.LabelField("Server ");
             isServer = EditorGUILayout.Toggle(isServer);
             GUILayout.EndHorizontal();
+
 			roomName = EditorGUILayout.TextField("Room Name", roomName, EditorStyles.objectField);
 			teamID = EditorGUILayout.IntField("TeamID", teamID, EditorStyles.objectField);
-			roomName = EditorGUILayout.TextField("Team Name", teamName, EditorStyles.objectField);
-			goalPoints = EditorGUILayout.IntField("TeamID", goalPoints, EditorStyles.objectField);
-
-
+			teamName = EditorGUILayout.TextField("Team Name", teamName, EditorStyles.objectField);
+			goalPoints = EditorGUILayout.IntField("Goal Points", goalPoints, EditorStyles.objectField);
+	
             // Update Network manager settings
             //  OR find our network manager
             RefreshNetworkManager();

@@ -49,9 +49,15 @@ namespace UWBsummercampAPI{
 			
 
 			//Tmp for dev (delete later)
-
+			try{
 			canvasText = GameObject.Find("Canvas").GetComponentInChildren<Text> ();
+			}
+			catch{
+				
+				GameObject NewCanvas = new GameObject();
+				canvasText = NewCanvas.AddComponent<Text>();
 
+			}
 
 			//Tmp for dev finished
 
@@ -66,13 +72,13 @@ namespace UWBsummercampAPI{
 			myTeamID = NetworkManager.teamID;
 
 			//check with network manager if it's master.
-			//if it, so create networked hashtab
-			//otherwise, wuery it and populate local gameBuffer
+			//if it's, create networked hashtab
+			//otherwise, query it and populate local gameBuffer
 
 
 
 			if (NetworkManager.HostGame) {
-				requestDBsync ();
+
 				goalPoints = NetworkManager.goal;
 				updateCache (myTeamID.ToString () + "Points", 0);
 				updateCache ("goalPoints", goalPoints);
@@ -81,8 +87,6 @@ namespace UWBsummercampAPI{
 				readyToStart = true;
 
 			} 
-
-
 
 
 
@@ -127,43 +131,38 @@ namespace UWBsummercampAPI{
 
 
 			//fix networking:
-			if (firstUpdate && NetworkManager.isConnected()) {
-				List<Component> tmpList = new List<Component> ();
-				tmpList.Add (this.gameObject.GetComponent<gameManagerBehavior> ());
-				pV.ObservedComponents = tmpList;
+			if (firstUpdate && NetworkManager.isInRoom()) {
 				requestDBsync ();
-				firstUpdate = false;
-				addPoints (0, myTeamID);
 
+				if (readyToStart) {
 
-			}
+					List<Component> tmpList = new List<Component> ();
+					tmpList.Add (this.gameObject.GetComponent<gameManagerBehavior> ());
+					pV.ObservedComponents = tmpList;
 
-			//finish inicializing game
-			if (readyToStart) {
+					//if team doesn't exist this will create point entry for it and avour null exception
+					addPoints (0, myTeamID);
 
-
-				try
-				{
 					goalPoints = queryCache ("goalPoints");
 					points = queryCache (myTeamID.ToString () + "Points");
+
+					firstUpdate = false;
+
 				}
-				catch (System.Exception e)
-				{
-					print(e.ToString());
-					addPoints (0, myTeamID);
-				}
+			}
+
 
 
 					
 
 
-			}
+
 		
 
 
 	
 
-        if (points >= goalPoints)
+			if (points >= goalPoints && readyToStart)
         {
            // winGame();
         }
@@ -197,7 +196,7 @@ namespace UWBsummercampAPI{
         if (winFlag || loseFlag)
             return;
 
-        if (pV != null)
+        if (pV != null  && NetworkManager.isInRoom() )
         {
             // This file PunRPC
             pV.RPC("winGameRPC", PhotonTargets.All); // *
@@ -224,7 +223,7 @@ namespace UWBsummercampAPI{
         if (winFlag || loseFlag)
             return;
 
-        if (pV != null)
+        if (pV != null  && NetworkManager.isInRoom() )
         {
             // This file PunRPC
             pV.RPC("loseGameRPC", PhotonTargets.All); // *
@@ -260,7 +259,7 @@ namespace UWBsummercampAPI{
 			}
 			updateCache (teamID.ToString () + "Points", totalPoints);
 
-        if (pV != null)
+        if (pV != null  && NetworkManager.isInRoom() )
         {
             // This file PunRPC
 				pV.RPC("setPointsRPC", PhotonTargets.All, totalPoints, teamID); // *
@@ -300,7 +299,7 @@ namespace UWBsummercampAPI{
 		public bool requestDBsync()
 		{
 
-			if (pV != null)
+			if (pV != null  && NetworkManager.isInRoom()  )
 			{
 
 					pV.RPC ("syncDBRPC", PhotonTargets.All); // *
@@ -317,7 +316,7 @@ namespace UWBsummercampAPI{
 		public bool syncDBRPC()
 		{
 
-			if (pV != null)
+			if (pV != null  && NetworkManager.isInRoom() )
 			{
 
 
@@ -360,7 +359,7 @@ namespace UWBsummercampAPI{
 		{
 			int newGoal = goalTMP;
 
-			if (pV != null)
+			if (pV != null  && NetworkManager.isInRoom() )
 			{
 				// This file PunRPC
 				pV.RPC("setGoalRPC", PhotonTargets.All, newGoal); // *
@@ -466,7 +465,7 @@ namespace UWBsummercampAPI{
 	private void updateNetworkedCache (){
 
 			//custom properties not really working...
-			pP.SetCustomProperties(gameBuffer, gameBuffer);
+			//pP.SetCustomProperties(gameBuffer, gameBuffer);
 
 			//this is the workarouns custom properties issue.
 			syncDBRPC ();

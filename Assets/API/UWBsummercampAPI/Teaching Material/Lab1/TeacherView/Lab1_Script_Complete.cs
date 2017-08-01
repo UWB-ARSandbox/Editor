@@ -8,7 +8,7 @@ public class Lab1_Script_Complete : coreCharacterBehavior {
 	//buildGame is for things you want to set before the game runs
 	void buildGame () {
 		//Insert Code Here
-		setGoal (10);
+		//setGoal (10);
 		moveForward ();
 
 

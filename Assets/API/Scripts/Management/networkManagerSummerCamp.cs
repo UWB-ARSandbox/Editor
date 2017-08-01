@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class networkManagerSummerCamp : PunBehaviour {
 
-	public bool HostGame = false;
+	public bool HostGame = true;
 	public string RoomName = "UWBSummerCamp";
 	public int teamID = 0;
 	public string teamName = "Observer";
@@ -26,7 +26,7 @@ public class networkManagerSummerCamp : PunBehaviour {
 	}
 
 
-	public bool isConnected(){
+	public bool isInRoom(){
 
 		return PhotonNetwork.inRoom;
 
