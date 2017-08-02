@@ -443,6 +443,10 @@ namespace UWBsummercampAPI{
 
 		}
 
+		public GameObject getPlayer(){
+			return playerCharacter;
+		}
+
 		#endregion
 
 

@@ -7,7 +7,7 @@ public class ViveClickToMove : MonoBehaviour
 
     public VRTK.VRTK_SimplePointer pointer;
     private bool lastPointerState = false;
-    private PhotonView pV;
+	private GameObject GameManager;
 
 	// Use this for initialization
 	void Start ()
@@ -15,7 +15,7 @@ public class ViveClickToMove : MonoBehaviour
         if (pointer == null)
             Debug.LogError("Missing pointer component on [ViveClickToMove]");
 
-        pV = GameObject.Find("PlayerCharacter").GetComponent<PhotonView>();
+		GameManager = GameObject.Find("GameManager");
     }
 	
 	// Update is called once per frame
@@ -24,7 +24,7 @@ public class ViveClickToMove : MonoBehaviour
         if(lastPointerState && !pointer.pointerTip.gameObject.GetActive())
         {
             //PhotonNetwork.Instantiate("Cube", pointer.pointerTip.transform.position, new Quaternion(), 0);
-            pV.RPC("setDestinationRPC", PhotonTargets.All, pointer.pointerTip.transform.position); // *
+			GameManager.GetComponent<UWBsummercampAPI.gameManagerBehavior>().getPlayer().GetComponent<UWBsummercampAPI.coreCharacterBehavior>().setClickToMove(pointer.pointerTip.transform.position);
         }
 
         lastPointerState = pointer.pointerTip.gameObject.GetActive();
