@@ -32,13 +32,13 @@ namespace UWBsummercampAPI{
 	
 	private int myTeamID = 0;
 	private bool firstUpdate = true;
-		private bool readyToStart = false;
+	private bool readyToStart = false;
 	private bool customPropertyChanged = false;
+	private GameObject playerCharacter;
 
 
-
-		//Tmp for dev (delete later)
-		private Text canvasText ;
+	//Tmp for dev (delete later)
+	private Text canvasText ;
 
 
 
@@ -148,6 +148,16 @@ namespace UWBsummercampAPI{
 
 					firstUpdate = false;
 
+					if (! NetworkManager.HostGame) {
+						//photon instantiate and place in playerCharacter
+
+						Vector3 spawningPosition = Camera.main.gameObject.transform.position;
+						Quaternion spawningRotation = Camera.main.gameObject.transform.rotation;
+						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
+
+
+					}
+
 				}
 			}
 
@@ -188,6 +198,45 @@ namespace UWBsummercampAPI{
                 }
             }
         }
+
+
+
+			//Handle click to move
+
+
+			if ((Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) || (Input.GetMouseButton(0)))
+			{
+
+				Debug.Log ("Clicked");
+				//declare a variable of RaycastHit struct
+				RaycastHit hit;
+
+				//Create a Ray on the tapped / clicked position
+				Ray ray = new Ray();
+
+				//for unity editor
+				#if (UNITY_EDITOR || UNITY_STANDALONE)
+				ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+				//for touch device
+				#elif (UNITY_ANDROID || UNITY_IPHONE || UNITY_WP8)
+				ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
+				#endif
+
+				//Check if the ray hits any collider
+				if (Physics.Raycast(ray, out hit))
+				{
+					Vector3 destPoint; 
+					//save the click / tap position
+					destPoint = hit.point;
+					//as we do not want to change the y axis value based on touch position, reset it to original y axis value
+					destPoint.y = playerCharacter.transform.position.y - playerCharacter.transform.localScale.y;
+					playerCharacter.GetComponent<coreCharacterBehavior> ().setClickToMove (destPoint);
+				}
+
+			}
+
+
+
     }
 
     #region Win/Lose Game
@@ -395,7 +444,6 @@ namespace UWBsummercampAPI{
 		}
 
 		#endregion
-
 
 
 
