@@ -619,10 +619,31 @@ public class coreObjectsBehavior : MonoBehaviour
 
     }
 
-    public void destroyObject()
-    {
-        Destroy(this.gameObject);
-    }
+
+
+		public void destroyObject()
+		{
+			if (pV != null)
+			{
+				// This file PunRPC
+				//pV.RPC("destroyObjectRPC", PhotonTargets.All);
+				PhotonNetwork.Destroy(this.gameObject);
+			}
+			else
+			{
+				// Make this object visible
+				//destroyObjectRPC();
+			}
+		}
+		/*
+		[PunRPC]
+		public void destroyObjectRPC()
+		{
+			this.gameObject.transform
+		}*/
+
+
+
     #endregion
 
     #region Display Text
