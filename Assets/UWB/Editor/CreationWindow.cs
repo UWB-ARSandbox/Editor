@@ -39,7 +39,6 @@ public class CreationWindow : EditorWindow
 	static string roomName ;
 	static bool isServer;
 	static int teamID ;
-	static string teamName;
 	static int goalPoints;
 
     // Folding sections
@@ -120,7 +119,6 @@ public class CreationWindow : EditorWindow
 				roomName = netManager.RoomName ;
 				isServer = netManager.HostGame;
 				teamID = netManager.teamID;
-				teamName = netManager.teamName;
 				goalPoints = netManager.goal ; 
 				justAwake = false;
 			}
@@ -139,13 +137,12 @@ public class CreationWindow : EditorWindow
         
 
 	// If we've changed our network manager's settings
-	if (netManager != null && ( !(netManager.RoomName == roomName) || netManager.HostGame != isServer || !(netManager.teamID == teamID) || !(netManager.teamName == teamName) || !(netManager.goal == goalPoints) ))
+	if (netManager != null && ( !(netManager.RoomName == roomName) || netManager.HostGame != isServer || !(netManager.teamID == teamID) || !(netManager.goal == goalPoints) ))
 	{
 
 		netManager.RoomName = roomName;
 		netManager.HostGame = isServer;
 		netManager.teamID = teamID;
-		netManager.teamName = teamName;
 		netManager.goal = goalPoints; 
 		EditorUtility.SetDirty(netManager); // Fairly expensive operation
 
@@ -434,7 +431,6 @@ public class CreationWindow : EditorWindow
 
 			roomName = EditorGUILayout.TextField("Room Name", roomName, EditorStyles.objectField);
 			teamID = EditorGUILayout.IntField("TeamID", teamID, EditorStyles.objectField);
-			teamName = EditorGUILayout.TextField("Team Name", teamName, EditorStyles.objectField);
 			goalPoints = EditorGUILayout.IntField("Goal Points", goalPoints, EditorStyles.objectField);
 	
             // Update Network manager settings
