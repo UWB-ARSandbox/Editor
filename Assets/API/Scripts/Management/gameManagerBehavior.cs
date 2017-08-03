@@ -160,13 +160,9 @@ namespace UWBsummercampAPI{
 						spawningRotation = GameObject.Find ("Camera").transform.rotation;
 						GameObject.Destroy (GameObject.Find ("Camera"));
 
-//						GameObject CameraRig = Instantiate (Resources.Load ("[CameraRig]"), spawningPosition, spawningRotation) as GameObject;
-//						GameObject ViveAvatar = Instantiate (Resources.Load ("ViveAvatar"), spawningPosition, spawningRotation) as GameObject;
-						GameObject CameraRig = Resources.Load ("[CameraRig]") as GameObject;
-						CameraRig.transform.position = spawningPosition;
-						CameraRig.transform.rotation = spawningRotation;
+						GameObject CameraRig = Instantiate (Resources.Load ("[CameraRig]"), spawningPosition, spawningRotation) as GameObject;
+						GameObject ViveAvatar = Instantiate (Resources.Load ("ViveAvatar"), spawningPosition, spawningRotation) as GameObject;
 
-						GameObject ViveAvatar = Resources.Load("ViveAvatar") as GameObject;
 
 
 
