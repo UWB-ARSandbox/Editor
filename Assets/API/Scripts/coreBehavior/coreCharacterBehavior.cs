@@ -342,12 +342,33 @@ public class coreCharacterBehavior : MonoBehaviour
     #endregion
 
 
-    public void jump(int forceTMP = 10)
+    public void jump(int forceTMP = 500)
     {
-        int force = forceTMP * 50;
-        GetComponent<Rigidbody>().AddForce(0, force, 0);
+
+			if (pV != null)
+			{
+				// This file PunRPC
+				pV.RPC("jumpRPC", PhotonTargets.All, forceTMP);
+			}
+			else
+			{
+				// Make this character bigger without calling
+				//  an RPC; this is unnetworked
+				jumpRPC(forceTMP);
+			}
+
+
     }
-    
+
+
+		[PunRPC]
+		public void jumpRPC(int force)
+		{
+			GetComponent<Rigidbody>().AddForce(0, force, 0);
+
+		}
+
+
     public bool isJumping()
     {
         return isJumpingFlag;

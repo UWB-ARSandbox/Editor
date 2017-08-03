@@ -86,7 +86,9 @@ namespace UWBsummercampAPI{
 
 				points = 0;
 
-			} 
+			} else {
+				NetworkManager.joinRoom ();
+			}
 
 
 
@@ -94,7 +96,7 @@ namespace UWBsummercampAPI{
         
         instance = this;
 
-			NetworkManager.joinRoom ();
+
 
 
 //read or create initial networked database
@@ -112,19 +114,7 @@ namespace UWBsummercampAPI{
 
 			//Tmp for dev (delete later)
 
-
 			canvasText.text = "";
-			/* More deletable dev stuff...
-			if (Input.GetKeyDown (KeyCode.Space)) {
-				//setGoal (22);
-
-				Debug.Log ("BUFFEERRR RAW: ");
-				Debug.Log (pP.customProperties.ToString ());
-				Debug.Log ("BUFFEERRR: ");
-				Debug.Log (gameBuffer);
-
-			}*/
-
 			canvasText.text = "myTeam: " + myTeamID + "\n Goal: " + goalPoints + "\n Points: " + points;
 
 			//Tmp for dev finished
@@ -133,7 +123,11 @@ namespace UWBsummercampAPI{
 
 			//fix networking:
 			if (firstUpdate && NetworkManager.isInRoom()) {
-				
+
+
+
+				Vector3 spawningPosition;
+				Quaternion spawningRotation;
 
 
 					List<Component> tmpList = new List<Component> ();
@@ -150,13 +144,44 @@ namespace UWBsummercampAPI{
 
 					if (! NetworkManager.HostGame) {
 						//photon instantiate and place in playerCharacter
-
+//For some reason the Camera.main is not working...
 //						Vector3 spawningPosition = Camera.main.gameObject.transform.position;
 //						Quaternion spawningRotation = Camera.main.gameObject.transform.rotation;
-						Vector3 spawningPosition = GameObject.Find("Camera").transform.position;
-						Quaternion spawningRotation = GameObject.Find("Camera").transform.rotation;
+
+
+					Debug.Log ("DEVICE:" + NetworkManager.getDevice ());
+
+					switch (NetworkManager.getDevice())
+					{
+					case "VR":
+						print ("VR was choosed!!");
+
+						spawningPosition = GameObject.Find ("Camera").transform.position;
+						spawningRotation = GameObject.Find ("Camera").transform.rotation;
+						GameObject.Destroy (GameObject.Find ("Camera"));
+
+						GameObject VRCamera =  Instantiate(Resources.Load("VRCamera"), spawningPosition, spawningRotation) as GameObject;
+						spawningPosition = new Vector3 (spawningPosition.x + 2f, spawningPosition.y, spawningPosition.z);
+
 						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
-						playerCharacter.AddComponent<cameraFollower> ().OnStartFollowing();
+
+
+						break;
+					case "Tango":
+						print ("Tango Tango Tango!!!");
+						break;
+					default:
+						print ("Normal PC Stuff");
+
+
+						spawningPosition = GameObject.Find ("Camera").transform.position;
+						spawningRotation = GameObject.Find ("Camera").transform.rotation;
+						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
+						playerCharacter.AddComponent<cameraFollower> ().OnStartFollowing ();
+						playerCharacter.GetComponent<coreCharacterBehavior> ().setTeam (myTeamID);
+
+						break;
+					}
 
 
 					}

@@ -21,13 +21,18 @@ public class lobbyManager : PunBehaviour {
 
 
 	private int[] teamsList = {1, 2, 3, 4};
-	private string[] deviceList = { "Workstation", "HMD", "Phone" };
+	private string[] deviceList = { "Workstation", "VR" };
 
 	// Use this for initialization
 	void Start () {
 		
 		PhotonNetwork.ConnectToMaster ("172.21.209.145", 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
 
+		#if (UNITY_ANDROID)
+
+		deviceList = new string[] { "Tango"};
+
+		#endif
 
 
 		//Setup Interface
@@ -72,21 +77,22 @@ public class lobbyManager : PunBehaviour {
 	void Update () {
 
 
-		//Dropdown.options[Dropdown.value].text
+		//update values
 		try{
 		roomName = dropdownRoom.options[ dropdownRoom.value].text;
-		teamID = int.Parse( dropdownRoom.options[ dropdownRoom.value].text);
+		teamID = int.Parse( dropdownTeam.options[dropdownTeam.value].text);
+		playerName = playerInputfield.text;
+		device = dropdownDevices.options[dropdownDevices.value].text;
+		
 		}
 		catch{
 
 		}
 
-		if (roomName == null) {
+		if (roomName == null || playerName == "") {
 			joinButton.interactable = false;
 		} else {
-
 			joinButton.interactable = true;
-
 		}
 
 		

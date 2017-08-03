@@ -52,6 +52,22 @@ public class networkManagerSummerCamp : PunBehaviour {
 
 			string[] bufferTMP = sceneBuffer.getBuffer ();
 
+			Debug.Log ("NEtworkManager Buffer:");
+
+			Debug.Log ("Roomname:");
+			Debug.Log (bufferTMP[0]);
+
+			Debug.Log ("teamID:");
+			Debug.Log (bufferTMP[1]);
+
+			Debug.Log ("playerName");
+			Debug.Log (bufferTMP[2]);
+
+			Debug.Log ("Device: ");
+			Debug.Log (bufferTMP[3]);
+
+
+
 			RoomName =	 bufferTMP[0];
 			teamID = int.Parse(bufferTMP[1]);
 			playerName = bufferTMP [2];
@@ -85,6 +101,11 @@ public class networkManagerSummerCamp : PunBehaviour {
 	public Room getRoom(){
 
 		return 	PhotonNetwork.room;
+	}
+
+	public String getDevice(){
+
+		return 	device;
 	}
 
 
