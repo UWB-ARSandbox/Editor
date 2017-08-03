@@ -160,10 +160,12 @@ namespace UWBsummercampAPI{
 						spawningRotation = GameObject.Find ("Camera").transform.rotation;
 						GameObject.Destroy (GameObject.Find ("Camera"));
 
-						GameObject VRCamera =  Instantiate(Resources.Load("VRCamera"), spawningPosition, spawningRotation) as GameObject;
+						GameObject CameraRig = Instantiate (Resources.Load ("[CameraRig]"), spawningPosition, spawningRotation) as GameObject;
+						GameObject ViveAvatar = Instantiate (Resources.Load ("ViveAvatar"), spawningPosition, spawningRotation) as GameObject;
 						spawningPosition = new Vector3 (spawningPosition.x + 2f, spawningPosition.y, spawningPosition.z);
 
 						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
+						playerCharacter.GetComponent<coreCharacterBehavior> ().setText (NetworkManager.getPlayerName());
 
 
 						break;
@@ -179,6 +181,7 @@ namespace UWBsummercampAPI{
 						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
 						playerCharacter.AddComponent<cameraFollower> ().OnStartFollowing ();
 						playerCharacter.GetComponent<coreCharacterBehavior> ().setTeam (myTeamID);
+						playerCharacter.GetComponent<coreCharacterBehavior> ().setText (NetworkManager.getPlayerName());
 
 						break;
 					}

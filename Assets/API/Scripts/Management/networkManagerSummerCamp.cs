@@ -109,6 +109,12 @@ public class networkManagerSummerCamp : PunBehaviour {
 	}
 
 
+	public String getPlayerName(){
+
+		return 	playerName;
+	}
+
+
 	public override void OnConnectedToMaster()
 	{
 
