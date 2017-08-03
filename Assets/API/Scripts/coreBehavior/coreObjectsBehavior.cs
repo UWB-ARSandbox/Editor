@@ -22,7 +22,6 @@ public class coreObjectsBehavior : MonoBehaviour
     // Dynamic Variables
     private GameObject iteractionObj = null;
     private GameObject lastSpawned = null;
-    private TextMesh objText = null;
     private float timer = 0;
     private int timerMax = 10;
 
@@ -412,20 +411,8 @@ public class coreObjectsBehavior : MonoBehaviour
         else
         {
             // Make this character win
-            ChangeColorRPC(r, g, b);
+            //ChangeColorRPC(r, g, b);
         }
-    }
-
-    [PunRPC]
-    public void ChangeColorRPC(float r, float g, float b)
-    {
-        if (this.gameObject.GetComponent<Renderer>() == null)
-        {
-            Debug.LogWarning("RPC [ChangeColor] called on object with no Renderer");
-            return;
-        }
-
-        this.gameObject.GetComponent<Renderer>().material.color = new Color(r, g, b);
     }
 
     [PunRPC]
@@ -657,26 +644,8 @@ public class coreObjectsBehavior : MonoBehaviour
         else
         {
             // Set this object's text
-            setTextRPC(text);
+            //setTextRPC(text);
         }
-    }
-
-    [PunRPC]
-    public void setTextRPC(string text)
-    {
-        if (objText == null)
-            createText();
-
-        objText.text = text;
-    }
-
-    private void createText()
-    {
-        GameObject objTextGO = new GameObject();
-        objTextGO.transform.parent = gameObject.transform;
-        objTextGO.transform.localPosition = new Vector3(0, gameObject.transform.localScale.y, 0);
-        objText = objTextGO.AddComponent<TextMesh>();
-        objText.anchor = TextAnchor.LowerCenter;
     }
     #endregion
 }

@@ -31,7 +31,6 @@ public class coreCharacterBehavior : MonoBehaviour
     private float yAxis;
     protected sizes characterSize = sizes.normal;
     private GameObject lastSpawned = null;
-    private TextMesh objText = null;
     protected int speed;
     private float timer = 0;
     private int timerMax = 10;
@@ -606,24 +605,6 @@ public class coreCharacterBehavior : MonoBehaviour
             // Set this object's text
             setTextRPC(text);
         }
-    }
-
-    [PunRPC]
-    public void setTextRPC(string text)
-    {
-        if (objText == null)
-            createText();
-
-        objText.text = text;
-    }
-
-    private void createText()
-    {
-        GameObject objTextGO = new GameObject();
-        objTextGO.transform.parent = gameObject.transform;
-        objTextGO.transform.localPosition = new Vector3(0, gameObject.transform.localScale.y, 0);
-        objText = objTextGO.AddComponent<TextMesh>();
-        objText.anchor = TextAnchor.LowerCenter;
     }
     #endregion
 }
