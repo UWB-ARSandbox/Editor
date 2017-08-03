@@ -1,7 +1,7 @@
 using UnityEngine;
 using UWBsummercampAPI;
 
-public class jumpper : coreObjectsBehavior {
+public class TestColor : coreObjectsBehavior {
 	
 	// buildGame() is called once, at the start
 	// of the game
@@ -14,8 +14,8 @@ public class jumpper : coreObjectsBehavior {
 	void updateGame () {
 
 		if (playerIsTouching ()) {
-			changeColor("red");
 
+			changeColor ("red");
 		}
 		
 	}

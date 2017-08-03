@@ -603,7 +603,7 @@ public class coreCharacterBehavior : MonoBehaviour
         else
         {
             // Set this object's text
-            setTextRPC(text);
+           // setTextRPC(text);
         }
     }
     #endregion

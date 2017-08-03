@@ -149,6 +149,15 @@ namespace UWBsummercampAPI{
 //						Quaternion spawningRotation = Camera.main.gameObject.transform.rotation;
 
 
+				
+					UWBPhotonTransformView [] listOfUWBPhotonOBJ = GameObject.FindObjectsOfType<UWBPhotonTransformView> ();
+
+					foreach (UWBPhotonTransformView UWBPhoton in listOfUWBPhotonOBJ)
+					{
+						
+						UWBPhoton.gameObject.GetComponent<PhotonView>().RPC("RequestColorRPC", PhotonTargets.MasterClient); 
+					}
+
 					Debug.Log ("DEVICE:" + NetworkManager.getDevice ());
 
 					switch (NetworkManager.getDevice())
