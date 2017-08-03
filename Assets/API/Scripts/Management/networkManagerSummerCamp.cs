@@ -1,7 +1,9 @@
 ﻿using System;
 using Photon;
 using UnityEngine;
-//using UnityEditor;
+using UWBsummercampAPI;
+
+
 
 public class networkManagerSummerCamp : PunBehaviour {
 
@@ -13,14 +15,27 @@ public class networkManagerSummerCamp : PunBehaviour {
 	private RoomOptions roomOptions;
 	private SceneBuffer sceneBuffer;
 	private string playerName;
-	private string device;
+	private string device = "Workstation";
+	private gameManagerBehavior GameManager;
 
 
 	// Use this for initialization
 	void Start()
 	{
+		
+		GameObject _GameManager = GameObject.Find("GameManager");
+		if (_GameManager == null){
+			_GameManager = new GameObject ();
+			_GameManager.name = "GameManager";
+			_GameManager.AddComponent<gameManagerBehavior> ();
+		}
 
-		PhotonNetwork.automaticallySyncScene = true;
+
+		GameManager = _GameManager.GetComponent<gameManagerBehavior>();
+
+
+
+	//	PhotonNetwork.automaticallySyncScene = true;
 
 		roomOptions = new RoomOptions ();
 		roomOptions.maxPlayers = 5;
@@ -41,7 +56,7 @@ public class networkManagerSummerCamp : PunBehaviour {
 			teamID = int.Parse(bufferTMP[1]);
 			playerName = bufferTMP [2];
 			device = bufferTMP [3];
-
+			HostGame = false;
 
 
 		} 
@@ -95,6 +110,23 @@ public class networkManagerSummerCamp : PunBehaviour {
 
 
 		Debug.LogWarning("OnDisconnectedFromPhoton() was called by PUN");        
+	}
+
+	public bool joinRoom(){
+		
+
+			if (PhotonNetwork.connectionState.ToString () == "Disconnected") {
+				PhotonNetwork.ConnectToMaster ("172.21.209.145", 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
+			}		
+
+		if (!HostGame) {
+			PhotonNetwork.JoinRoom (RoomName);
+			return true;
+		}
+
+
+		return false;
+
 	}
 
 }

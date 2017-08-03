@@ -21,7 +21,7 @@ public class lobbyManager : PunBehaviour {
 
 
 	private int[] teamsList = {1, 2, 3, 4};
-	private string[] deviceList = { "Desktop", "HMD", "Phone" };
+	private string[] deviceList = { "Workstation", "HMD", "Phone" };
 
 	// Use this for initialization
 	void Start () {

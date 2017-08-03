@@ -44,6 +44,7 @@ public class coreObjectsBehavior : MonoBehaviour
         if (pV != null && PhotonNetwork.connectionStateDetailed == ClientState.Joined)
         {
             pV.RPC("RequestColorRPC", PhotonTargets.MasterClient);
+				pV.ObservedComponents.Add (this);
         }
     }
 

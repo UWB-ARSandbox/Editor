@@ -15,6 +15,7 @@ namespace UWBsummercampAPI{
     protected bool timerRunningFlag = false;
     protected bool timerFinishedFlag = false;
     protected bool timerLoopFlag = false;
+	protected bool readyToStart = false;
 
     // Dynamic Variables
     protected static int points;
@@ -32,9 +33,9 @@ namespace UWBsummercampAPI{
 	
 	private int myTeamID = 0;
 	private bool firstUpdate = true;
-	private bool readyToStart = false;
 	private bool customPropertyChanged = false;
 	private GameObject playerCharacter;
+	private string device;
 
 
 	//Tmp for dev (delete later)
@@ -84,7 +85,6 @@ namespace UWBsummercampAPI{
 				updateCache ("goalPoints", goalPoints);
 
 				points = 0;
-				readyToStart = true;
 
 			} 
 
@@ -94,7 +94,7 @@ namespace UWBsummercampAPI{
         
         instance = this;
 
-
+			NetworkManager.joinRoom ();
 
 
 //read or create initial networked database
@@ -114,6 +114,7 @@ namespace UWBsummercampAPI{
 
 
 			canvasText.text = "";
+			/* More deletable dev stuff...
 			if (Input.GetKeyDown (KeyCode.Space)) {
 				//setGoal (22);
 
@@ -122,7 +123,7 @@ namespace UWBsummercampAPI{
 				Debug.Log ("BUFFEERRR: ");
 				Debug.Log (gameBuffer);
 
-			}
+			}*/
 
 			canvasText.text = "myTeam: " + myTeamID + "\n Goal: " + goalPoints + "\n Points: " + points;
 
@@ -132,9 +133,8 @@ namespace UWBsummercampAPI{
 
 			//fix networking:
 			if (firstUpdate && NetworkManager.isInRoom()) {
-				requestDBsync ();
+				
 
-				if (readyToStart) {
 
 					List<Component> tmpList = new List<Component> ();
 					tmpList.Add (this.gameObject.GetComponent<gameManagerBehavior> ());
@@ -151,14 +151,17 @@ namespace UWBsummercampAPI{
 					if (! NetworkManager.HostGame) {
 						//photon instantiate and place in playerCharacter
 
-						Vector3 spawningPosition = Camera.main.gameObject.transform.position;
-						Quaternion spawningRotation = Camera.main.gameObject.transform.rotation;
+//						Vector3 spawningPosition = Camera.main.gameObject.transform.position;
+//						Quaternion spawningRotation = Camera.main.gameObject.transform.rotation;
+						Vector3 spawningPosition = GameObject.Find("Camera").transform.position;
+						Quaternion spawningRotation = GameObject.Find("Camera").transform.rotation;
 						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
+						playerCharacter.AddComponent<cameraFollower> ().OnStartFollowing();
 
 
 					}
 
-				}
+
 			}
 
 
@@ -216,10 +219,10 @@ namespace UWBsummercampAPI{
 
 				//for unity editor
 				#if (UNITY_EDITOR || UNITY_STANDALONE)
-				ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+				ray =  GameObject.Find("Camera").GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
 				//for touch device
 				#elif (UNITY_ANDROID || UNITY_IPHONE || UNITY_WP8)
-				ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
+				ray =  GameObject.Find("Camera").GetComponent<Camera>().ScreenPointToRay(Input.GetTouch(0).position);
 				#endif
 
 				//Check if the ray hits any collider
@@ -229,7 +232,8 @@ namespace UWBsummercampAPI{
 					//save the click / tap position
 					destPoint = hit.point;
 					//as we do not want to change the y axis value based on touch position, reset it to original y axis value
-					destPoint.y = playerCharacter.transform.position.y - playerCharacter.transform.localScale.y;
+					destPoint.y = playerCharacter.transform.position.y - playerCharacter.transform.localScale.y ;
+
 					playerCharacter.GetComponent<coreCharacterBehavior> ().setClickToMove (destPoint);
 				}
 
@@ -304,9 +308,10 @@ namespace UWBsummercampAPI{
 			}
 			catch (System.Exception e)
 			{
-
+				Debug.Log ("cache didn't exist yet...");
+				totalPoints = 0;
 			}
-			updateCache (teamID.ToString () + "Points", totalPoints);
+
 
         if (pV != null  && NetworkManager.isInRoom() )
         {
@@ -328,7 +333,7 @@ namespace UWBsummercampAPI{
 			}
 
 			if (NetworkManager.HostGame) {
-
+				updateCache (teamID.ToString () + "Points", pointTotal);
 
 			}
 
@@ -388,7 +393,6 @@ namespace UWBsummercampAPI{
 		{
 			if (!NetworkManager.HostGame) {
 				gameBuffer = bufferTMP;
-				readyToStart = true;
 				Debug.Log ("buffer updated " + gameBuffer);
 			}
 		}

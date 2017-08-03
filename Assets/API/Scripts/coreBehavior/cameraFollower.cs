@@ -109,7 +109,7 @@
 			/// </summary>
 			public void OnStartFollowing()
 			{         
-				cameraTransform = Camera.main.transform;
+			cameraTransform = GameObject.Find("Camera").transform;
 				isFollowing = true;
 				// we don't smooth anything, we go straight to the right camera shot
 				Cut();

@@ -74,7 +74,7 @@ public class coreCharacterBehavior : MonoBehaviour
         startMethod = this.GetType().GetMethod("buildGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
         updateMethod = this.GetType().GetMethod("updateGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
 
-        yAxis = gameObject.transform.position.y - gameObject.transform.localScale.y;
+        yAxis = gameObject.transform.position.y - gameObject.transform.localScale.y +.3f;
 
 
     }
@@ -124,9 +124,12 @@ public class coreCharacterBehavior : MonoBehaviour
 
 
 			if (clickMoveFlag) {
+
+
 				isMovingFlag = false;
-				if (Vector2.Distance (gameObject.transform.position, destPoint) > 1) {
-				//	clickMoveFlag = false;
+				if (Vector2.Distance (gameObject.transform.position, destPoint) < 1) {
+					
+					clickMoveFlag = false;
 				}
 
 				gameObject.transform.position = Vector3.Lerp(gameObject.transform.position, destPoint, 1 / (clickMovementSpeed * (Vector3.Distance(gameObject.transform.position, destPoint))));
