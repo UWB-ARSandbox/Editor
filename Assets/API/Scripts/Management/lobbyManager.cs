@@ -12,12 +12,16 @@ public class lobbyManager : PunBehaviour {
 	public InputField playerInputfield;
 	public Button joinButton;
 	public Button refreshRoomListButton;
+	public Toggle privateRoomToggle;
+	public InputField roomNameInputField;
 
 
 	private string roomName; 
 	private int teamID;
 	private string playerName;
 	private string device;
+	private bool privateRoom; 
+	private bool validRoom;
 
 
 	private int[] teamsList = {1, 2, 3, 4};
@@ -38,16 +42,17 @@ public class lobbyManager : PunBehaviour {
 		//Setup Interface
 
 		//Setup Rooms
+		privateRoom = false;
+		privateRoomToggle.isOn = false;
 		refreshRoomList();
 
 
-		//Set Buttom Listner
+		//Set Listners
 		refreshRoomListButton.onClick.AddListener(refreshRoomList);
-
-		//Set Buttom Listener
 		joinButton.onClick.AddListener(joinChoosedGame);
-
-
+		privateRoomToggle.onValueChanged.AddListener (manageRoomPrivacy);
+		roomNameInputField.onValueChanged.AddListener(checkRoomName);
+		dropdownRoom.onValueChanged.AddListener (updateRoomNameDrop);
 
 		//Setup Teams
 		dropdownTeam.options.Clear ();
@@ -79,17 +84,18 @@ public class lobbyManager : PunBehaviour {
 
 		//update values
 		try{
-		roomName = dropdownRoom.options[ dropdownRoom.value].text;
-		teamID = int.Parse( dropdownTeam.options[dropdownTeam.value].text);
-		playerName = playerInputfield.text;
-		device = dropdownDevices.options[dropdownDevices.value].text;
-		
+
+			teamID = int.Parse( dropdownTeam.options[dropdownTeam.value].text);
+			playerName = playerInputfield.text;
+			device = dropdownDevices.options[dropdownDevices.value].text;
+
+
 		}
 		catch{
 
 		}
 
-		if (roomName == null || playerName == "") {
+		if (roomName == null || playerName == "" || !validRoom) {
 			joinButton.interactable = false;
 		} else {
 			joinButton.interactable = true;
@@ -110,13 +116,83 @@ public class lobbyManager : PunBehaviour {
 		foreach (RoomInfo room in roomList) 
 		{
 			dropdownRoom.options.Add (new Dropdown.OptionData(room.name));
-			Debug.Log (room.name);
 		}
 
+		if (roomList.Length >0){
+		updateRoomNameDrop (0);
+			validRoom = true;
+		}
 		dropdownRoom.RefreshShownValue ();
 
 	}
 
+
+
+
+
+	private void updateRoomNameDrop(int roomNameIdx){
+
+		roomName = dropdownRoom.options[roomNameIdx].text;
+		Debug.Log ("room changed to: " + roomName);
+
+	}
+
+
+
+
+	private void checkRoomName(string tmpRoomName){
+		//need to do a beter validatiom!!! like the following
+		/*
+
+		if (tmpRoomName != "") {
+			//need to check if the room name is valid...
+
+			if(PhotonNetwork.JoinRoom (roomName)){
+
+				PhotonNetwork.LeaveRoom();
+				validRoom = true;
+				roomName = tmpRoomName;
+			}
+				} else {
+
+					validRoom = false;
+				}
+
+*/
+
+		if (tmpRoomName != "") {
+				validRoom = true;
+				roomName = tmpRoomName;
+
+		} else {
+
+			validRoom = false;
+		}
+
+
+
+		}
+
+
+	private void manageRoomPrivacy(bool privateRoom)
+	{
+
+
+		if (privateRoom){
+			dropdownRoom.gameObject.SetActive(false);
+			roomNameInputField.gameObject.SetActive(true);
+			roomNameInputField.text = "";
+			roomName = roomNameInputField.text;
+			validRoom = false;
+
+		} else{
+			dropdownRoom.gameObject.SetActive(true);
+			roomNameInputField.gameObject.SetActive(false);	
+			validRoom = true;
+		}
+
+
+	}
 
 
 

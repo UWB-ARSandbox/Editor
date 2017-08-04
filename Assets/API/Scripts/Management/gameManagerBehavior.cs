@@ -158,7 +158,6 @@ namespace UWBsummercampAPI{
 						UWBPhoton.gameObject.GetComponent<PhotonView>().RPC("RequestColorRPC", PhotonTargets.MasterClient); 
 					}
 
-					Debug.Log ("DEVICE:" + NetworkManager.getDevice ());
 
 					switch (NetworkManager.getDevice())
 					{
@@ -171,10 +170,6 @@ namespace UWBsummercampAPI{
 
 						GameObject CameraRig = Instantiate (Resources.Load ("[CameraRig]"), spawningPosition, spawningRotation) as GameObject;
 						GameObject ViveAvatar = Instantiate (Resources.Load ("ViveAvatar"), spawningPosition, spawningRotation) as GameObject;
-
-
-
-
 						spawningPosition = new Vector3 (spawningPosition.x + 2f, spawningPosition.y, spawningPosition.z);
 
 						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
@@ -194,12 +189,11 @@ namespace UWBsummercampAPI{
 						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
 						playerCharacter.AddComponent<cameraFollower> ().OnStartFollowing ();
 						playerCharacter.GetComponent<coreCharacterBehavior> ().setTeam (myTeamID);
-						playerCharacter.GetComponent<coreCharacterBehavior> ().setText (NetworkManager.getPlayerName());
 
 						break;
 					}
 
-
+					playerCharacter.GetComponent<UWBPhotonTransformView> ().setTextRPC (NetworkManager.getPlayerName ());
 					}
 
 

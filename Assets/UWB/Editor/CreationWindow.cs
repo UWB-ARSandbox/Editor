@@ -37,8 +37,7 @@ public class CreationWindow : EditorWindow
     // Network Variables
 	static networkManagerSummerCamp netManager;
 	static string roomName ;
-	static bool isServer;
-	static int teamID ;
+	static bool isPrivate;
 	static int goalPoints;
 
     // Folding sections
@@ -117,8 +116,8 @@ public class CreationWindow : EditorWindow
 
 			} else if (justAwake) {
 				roomName = netManager.RoomName ;
-				isServer = netManager.HostGame;
-				teamID = netManager.teamID;
+				isPrivate = netManager.privateRoom;
+				netManager.HostGame = true;
 				goalPoints = netManager.goal ; 
 				justAwake = false;
 			}
@@ -137,12 +136,12 @@ public class CreationWindow : EditorWindow
         
 
 	// If we've changed our network manager's settings
-	if (netManager != null && ( !(netManager.RoomName == roomName) || netManager.HostGame != isServer || !(netManager.teamID == teamID) || !(netManager.goal == goalPoints) ))
+	if (netManager != null && ( !(netManager.RoomName == roomName) || netManager.privateRoom != isPrivate || !(netManager.goal == goalPoints) ))
 	{
 
 		netManager.RoomName = roomName;
-		netManager.HostGame = isServer;
-		netManager.teamID = teamID;
+		netManager.HostGame = true;
+		netManager.privateRoom = isPrivate;
 		netManager.goal = goalPoints; 
 		EditorUtility.SetDirty(netManager); // Fairly expensive operation
 
@@ -425,12 +424,11 @@ public class CreationWindow : EditorWindow
 
             RefreshNetworkConnection();
             GUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Server ");
-            isServer = EditorGUILayout.Toggle(isServer);
+            EditorGUILayout.LabelField("Private ");
+            isPrivate = EditorGUILayout.Toggle(isPrivate);
             GUILayout.EndHorizontal();
 
 			roomName = EditorGUILayout.TextField("Room Name", roomName, EditorStyles.objectField);
-			teamID = EditorGUILayout.IntField("TeamID", teamID, EditorStyles.objectField);
 			goalPoints = EditorGUILayout.IntField("Goal Points", goalPoints, EditorStyles.objectField);
 	
             // Update Network manager settings

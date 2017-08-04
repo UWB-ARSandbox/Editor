@@ -415,14 +415,6 @@ public class coreObjectsBehavior : MonoBehaviour
         }
     }
 
-    [PunRPC]
-    public void RequestColorRPC()
-    {
-        Debug.Log("Request Color RPC");
-        PhotonView phov = gameObject.GetComponent<PhotonView>();
-        Color thisColor = gameObject.GetComponent<Renderer>().material.color;
-        phov.RPC("ChangeColorRPC", PhotonTargets.All, thisColor.r, thisColor.g, thisColor.b);
-    }
     #endregion
 
     #region Game Manager Methods

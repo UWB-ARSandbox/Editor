@@ -8,6 +8,7 @@ using UWBsummercampAPI;
 public class networkManagerSummerCamp : PunBehaviour {
 
 	public bool HostGame = true;
+	public bool privateRoom = true;
 	public string RoomName = "UWBSummerCamp";
 	public int teamID = 0;
 	public int goal = 99999;
@@ -24,15 +25,15 @@ public class networkManagerSummerCamp : PunBehaviour {
 	{
 		
 		GameObject _GameManager = GameObject.Find("GameManager");
-		if (_GameManager == null){
+		if (_GameManager == null && (GameObject.Find("LobbyManager") == null )  ){
 			_GameManager = new GameObject ();
 			_GameManager.name = "GameManager";
 			_GameManager.AddComponent<gameManagerBehavior> ();
 		}
 
-
-		GameManager = _GameManager.GetComponent<gameManagerBehavior>();
-
+		if (_GameManager != null) {
+			GameManager = _GameManager.GetComponent<gameManagerBehavior> ();
+		}
 
 
 	//	PhotonNetwork.automaticallySyncScene = true;
@@ -40,7 +41,7 @@ public class networkManagerSummerCamp : PunBehaviour {
 		roomOptions = new RoomOptions ();
 		roomOptions.maxPlayers = 5;
 		roomOptions.isOpen = true;
-		roomOptions.isVisible = true;
+		roomOptions.isVisible = !privateRoom;
 
 		try{
 		sceneBuffer = GameObject.Find ("SceneBuffer").GetComponent<SceneBuffer>();
@@ -51,21 +52,6 @@ public class networkManagerSummerCamp : PunBehaviour {
 		if (sceneBuffer != null) {
 
 			string[] bufferTMP = sceneBuffer.getBuffer ();
-
-			Debug.Log ("NEtworkManager Buffer:");
-
-			Debug.Log ("Roomname:");
-			Debug.Log (bufferTMP[0]);
-
-			Debug.Log ("teamID:");
-			Debug.Log (bufferTMP[1]);
-
-			Debug.Log ("playerName");
-			Debug.Log (bufferTMP[2]);
-
-			Debug.Log ("Device: ");
-			Debug.Log (bufferTMP[3]);
-
 
 
 			RoomName =	 bufferTMP[0];
