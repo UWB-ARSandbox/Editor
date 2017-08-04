@@ -16,7 +16,7 @@ public class DestroyWall_Complete : coreObjectsBehavior {
 	void updateGame () {
 		//Insert Code Here
 		if (playerIsTouching()){
-			destroyObject ();
+			destroyObject();
 		}
 	}
 }

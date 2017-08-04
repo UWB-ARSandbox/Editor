@@ -9,7 +9,7 @@ public class Lab1_Script_Complete : coreCharacterBehavior {
 	void buildGame () {
 		//Insert Code Here
 		//setGoal (10);
-		moveForward ();
+
 
 
 	}
@@ -18,6 +18,6 @@ public class Lab1_Script_Complete : coreCharacterBehavior {
 	void updateGame () {
 		//Insert Code Here
 
-
+		moveForward ();
 	}
 }
