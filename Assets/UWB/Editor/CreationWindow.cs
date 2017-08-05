@@ -627,7 +627,9 @@ public class CreationWindow : EditorWindow
         }
         else
         {
-            obj.transform.position = GetViewCenterWorldPos();
+			Vector3 tmpPos = new Vector3 (0, 1, 0);
+//			obj.transform.position = GetViewCenterWorldPos();
+			obj.transform.position = tmpPos;
         }
 
         SpawnScript spawnScript = obj.GetComponent<SpawnScript>();
