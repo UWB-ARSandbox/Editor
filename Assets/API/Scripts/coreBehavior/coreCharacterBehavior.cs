@@ -35,7 +35,8 @@ public class coreCharacterBehavior : MonoBehaviour
     private float timer = 0;
     private int timerMax = 10;
 	private gameManagerBehavior GameManager;
-	private int teamID = 0;
+	private int teamID;
+	private string playerName;
 
     // Constant Variables
     PhotonView pV;
@@ -105,8 +106,6 @@ public class coreCharacterBehavior : MonoBehaviour
         }
         else if(startupFlag)
         {
-				//execute exactly once, to add team correctly (After GameManager been created)
-				teamID = GameManager.getTeam ();
 
             startupFlag = false;
             if (startMethod != null)
@@ -377,6 +376,32 @@ public class coreCharacterBehavior : MonoBehaviour
 
 		#region Team Management
 
+
+
+		public void setName(string _playerName)
+		{
+			if (pV != null)
+			{
+				// This file PunRPC
+				pV.RPC("setPlayerNameRPC", PhotonTargets.All, _playerName); // *
+			}
+			else
+			{
+				// Make player visible
+				setPlayerNameRPC(_playerName);
+			}
+		}
+
+		[PunRPC]
+		public void setPlayerNameRPC(string _playerName)
+		{
+			Debug.Log ("Player:" + name + " set name");
+			playerName = _playerName;
+		}
+
+
+
+
 		public void setTeam(int newTeam)
 		{
 			if (pV != null)
@@ -394,6 +419,7 @@ public class coreCharacterBehavior : MonoBehaviour
 		[PunRPC]
 		public void setTeamRPC(int newTeam)
 		{
+			Debug.Log ("Player:" + name + " settedTeam:" + teamID);
 			teamID = newTeam;
 		}
 
@@ -465,7 +491,7 @@ public class coreCharacterBehavior : MonoBehaviour
     public void addPoints(int pointsTMP = 10)
     {
 			Debug.Log ("Character here ID: " + teamID.ToString ());
-			gameManagerBehavior.instance.addPoints(pointsTMP, teamID);
+			gameManagerBehavior.instance.addPoints(pointsTMP, this.teamID);
     }
 
     public void removePoints(int pointsTMP = 10)
@@ -606,6 +632,9 @@ public class coreCharacterBehavior : MonoBehaviour
            // setTextRPC(text);
         }
     }
+
+
+
     #endregion
 }
 

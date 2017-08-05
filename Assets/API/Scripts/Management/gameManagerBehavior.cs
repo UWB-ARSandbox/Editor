@@ -33,13 +33,14 @@ namespace UWBsummercampAPI{
 	
 	private int myTeamID = 0;
 	private bool firstUpdate = true;
+	private bool updatePlayer = false;
 	private bool customPropertyChanged = false;
 	private GameObject playerCharacter;
 	private string device;
 
 
 	//Tmp for dev (delete later)
-	private Text canvasText ;
+		private CanvasManager mainCanvas = new CanvasManager();
 
 
 
@@ -48,19 +49,6 @@ namespace UWBsummercampAPI{
     void Start ()
     {
 			
-
-			//Tmp for dev (delete later)
-			try{
-			canvasText = GameObject.Find("Canvas").GetComponentInChildren<Text> ();
-			}
-			catch{
-				
-				GameObject NewCanvas = new GameObject();
-				canvasText = NewCanvas.AddComponent<Text>();
-
-			}
-
-			//Tmp for dev finished
 
 
 			pV = gameObject.AddComponent<PhotonView> ();
@@ -110,16 +98,20 @@ namespace UWBsummercampAPI{
 		{
 
 
+			if (playerCharacter != null) {
+
+				if (updatePlayer) {
+					playerCharacter.GetComponent<coreCharacterBehavior> ().setText (NetworkManager.getPlayerName ());
+					mainCanvas = playerCharacter.GetComponentInChildren<CanvasManager> ();
+					playerCharacter.GetComponent<coreCharacterBehavior> ().setTeam (myTeamID);
+					playerCharacter.GetComponent<coreCharacterBehavior> ().setName(NetworkManager.getPlayerName ());
 
 
-			//Tmp for dev (delete later)
+					updatePlayer = false;
+				}
+				mainCanvas.refreshDashboard ("myTeam: " + myTeamID + "\n Goal: " + goalPoints + "\n Points: " + points);
 
-			canvasText.text = "";
-			canvasText.text = "myTeam: " + myTeamID + "\n Goal: " + goalPoints + "\n Points: " + points;
-
-			//Tmp for dev finished
-
-
+			}
 
 			//fix networking:
 			if (firstUpdate && NetworkManager.isInRoom()) {
@@ -144,6 +136,10 @@ namespace UWBsummercampAPI{
 
 					if (! NetworkManager.HostGame) {
 						//photon instantiate and place in playerCharacter
+
+
+
+
 //For some reason the Camera.main is not working...
 //						Vector3 spawningPosition = Camera.main.gameObject.transform.position;
 //						Quaternion spawningRotation = Camera.main.gameObject.transform.rotation;
@@ -173,7 +169,7 @@ namespace UWBsummercampAPI{
 						spawningPosition = new Vector3 (spawningPosition.x + 2f, spawningPosition.y, spawningPosition.z);
 
 						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
-						playerCharacter.GetComponent<coreCharacterBehavior> ().setText (NetworkManager.getPlayerName());
+						updatePlayer = true;
 
 
 						break;
@@ -189,11 +185,11 @@ namespace UWBsummercampAPI{
 						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
 						playerCharacter.AddComponent<cameraFollower> ().OnStartFollowing ();
 						playerCharacter.GetComponent<coreCharacterBehavior> ().setTeam (myTeamID);
+						updatePlayer = true;
 
 						break;
 					}
 
-					playerCharacter.GetComponent<UWBPhotonTransformView> ().setTextRPC (NetworkManager.getPlayerName ());
 					}
 
 
