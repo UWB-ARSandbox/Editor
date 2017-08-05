@@ -37,6 +37,7 @@ namespace UWBsummercampAPI{
 	private bool customPropertyChanged = false;
 	private GameObject playerCharacter;
 	private string device;
+	private Vector3 spawnLocation;
 
 
 	//Tmp for dev (delete later)
@@ -73,6 +74,9 @@ namespace UWBsummercampAPI{
 				updateCache ("goalPoints", goalPoints);
 
 				points = 0;
+				spawnLocation = new Vector3 (0f, 1.32f, -13.64f);
+
+
 
 			} else {
 				NetworkManager.joinRoom ();
@@ -117,8 +121,6 @@ namespace UWBsummercampAPI{
 			if (firstUpdate && NetworkManager.isInRoom()) {
 
 
-
-				Vector3 spawningPosition;
 				Quaternion spawningRotation;
 
 
@@ -131,6 +133,8 @@ namespace UWBsummercampAPI{
 
 					goalPoints = queryCache ("goalPoints");
 					points = queryCache (myTeamID.ToString () + "Points");
+					
+					
 
 					firstUpdate = false;
 
@@ -138,7 +142,7 @@ namespace UWBsummercampAPI{
 						//photon instantiate and place in playerCharacter
 
 
-
+					spawnLocation = new Vector3 (float.Parse(queryCache ("spawnX").ToString()) , float.Parse(queryCache ("spawnY").ToString()) , float.Parse(queryCache ("spawnZ").ToString() ) );
 
 //For some reason the Camera.main is not working...
 //						Vector3 spawningPosition = Camera.main.gameObject.transform.position;
@@ -160,15 +164,20 @@ namespace UWBsummercampAPI{
 					case "VR":
 						print ("VR was choosed!!");
 
-						spawningPosition = GameObject.Find ("Camera").transform.position;
+						//spawningPosition = GameObject.Find ("Camera").transform.position;
 						spawningRotation = GameObject.Find ("Camera").transform.rotation;
 						GameObject.Destroy (GameObject.Find ("Camera"));
 
-						GameObject CameraRig = Instantiate (Resources.Load ("[CameraRig]"), spawningPosition, spawningRotation) as GameObject;
-						GameObject ViveAvatar = Instantiate (Resources.Load ("ViveAvatar"), spawningPosition, spawningRotation) as GameObject;
-						spawningPosition = new Vector3 (spawningPosition.x + 2f, spawningPosition.y, spawningPosition.z);
 
-						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
+						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawnLocation, spawningRotation, 0);
+
+						spawnLocation = new Vector3 (spawnLocation.x - 2f, spawnLocation.y, spawnLocation.z);
+
+						GameObject CameraRig = Instantiate (Resources.Load ("[CameraRig]"), spawnLocation, spawningRotation) as GameObject;
+						GameObject ViveAvatar = Instantiate (Resources.Load ("ViveAvatar"), spawnLocation, spawningRotation) as GameObject;
+
+
+
 						updatePlayer = true;
 
 
@@ -180,9 +189,9 @@ namespace UWBsummercampAPI{
 						print ("Normal PC Stuff");
 
 
-						spawningPosition = GameObject.Find ("Camera").transform.position;
+						//spawningPosition = GameObject.Find ("Camera").transform.position;
 						spawningRotation = GameObject.Find ("Camera").transform.rotation;
-						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
+						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawnLocation, spawningRotation, 0);
 						playerCharacter.AddComponent<cameraFollower> ().OnStartFollowing ();
 						playerCharacter.GetComponent<coreCharacterBehavior> ().setTeam (myTeamID);
 						updatePlayer = true;
@@ -375,7 +384,21 @@ namespace UWBsummercampAPI{
     #endregion
 
 
+		#region Location
+		public void setspawnLocation( Vector3 newSpawnLocation){
 
+			spawnLocation = newSpawnLocation;
+
+			updateCache( "spawnX", int.Parse (newSpawnLocation.x.ToString ()));
+			updateCache( "spawnY", int.Parse (newSpawnLocation.y.ToString ()));
+			updateCache( "spawnZ", int.Parse (newSpawnLocation.z.ToString ()));
+
+
+		}
+
+
+
+		#endregion
 
 
 

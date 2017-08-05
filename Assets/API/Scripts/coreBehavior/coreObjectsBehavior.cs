@@ -512,6 +512,12 @@ public class coreObjectsBehavior : MonoBehaviour
     {
         return gameManagerBehavior.instance.timerIsRunning(); ;
     }
+
+
+	public void setspawnLocation()
+	{
+			gameManagerBehavior.instance.setspawnLocation (this.transform.position);
+	}
     #endregion
 
     #region Timer
