@@ -64,7 +64,9 @@ public class networkManagerSummerCamp : PunBehaviour {
 		} 
 
 		if (!PhotonNetwork.connected) {
-			PhotonNetwork.ConnectToMaster ("172.21.209.145", 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
+//			PhotonNetwork.ConnectToMaster ("172.21.209.145", 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
+
+			PhotonNetwork.ConnectToMaster ("10.156.32.153", 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1");
 		}
 
 
@@ -129,7 +131,8 @@ public class networkManagerSummerCamp : PunBehaviour {
 		
 
 			if (PhotonNetwork.connectionState.ToString () == "Disconnected") {
-				PhotonNetwork.ConnectToMaster ("172.21.209.145", 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
+			//	PhotonNetwork.ConnectToMaster ("172.21.209.145", 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
+			PhotonNetwork.ConnectToMaster ("10.156.32.153", 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
 			}		
 
 		if (!HostGame) {
