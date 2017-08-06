@@ -24,7 +24,7 @@ public class lobbyManager : PunBehaviour {
 	private bool validRoom;
 
 
-	private int[] teamsList = {1, 2, 3, 4};
+	private string[] teamsList = {"1(Red)", "2(Purple)", "3(Blue)", "4(Yellow)"};
 	private string[] deviceList = { "Workstation", "VR" };
 
 	// Use this for initialization
@@ -56,9 +56,9 @@ public class lobbyManager : PunBehaviour {
 
 		//Setup Teams
 		dropdownTeam.options.Clear ();
-		foreach (int team in teamsList) 
+		foreach (string team in teamsList) 
 		{
-			dropdownTeam.options.Add (new Dropdown.OptionData(team.ToString()));
+			dropdownTeam.options.Add (new Dropdown.OptionData(team));
 
 		}
 		dropdownTeam.RefreshShownValue ();
@@ -85,7 +85,7 @@ public class lobbyManager : PunBehaviour {
 		//update values
 		try{
 
-			teamID = int.Parse( dropdownTeam.options[dropdownTeam.value].text);
+			teamID =  dropdownTeam.value +1 ; 
 			playerName = playerInputfield.text;
 			device = dropdownDevices.options[dropdownDevices.value].text;
 

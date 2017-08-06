@@ -475,6 +475,34 @@ public class coreCharacterBehavior : MonoBehaviour
     }
     #endregion
 
+
+		#region Color
+
+		public void changePlayerColor(float R, float G, float B){
+
+
+			if (pV != null)
+			{
+				// This file PunRPC
+				pV.RPC("ChangeColorRPC", PhotonTargets.All, R, G, B); // *
+			}
+			else
+			{
+				//GameObject.GetComponent<UWBPhotonTransformView> ().ChangeColorRPC (R, G, B);
+			}
+
+
+
+		}
+
+
+
+
+
+		#endregion
+
+
+
     #region GameManager Methods
     public void winGame()
     {

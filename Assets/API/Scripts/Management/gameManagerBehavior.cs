@@ -10,8 +10,7 @@ namespace UWBsummercampAPI{
 	public class gameManagerBehavior : MonoBehaviour
 	{
 		// Flags
-		protected static bool winFlag = false;
-		protected static bool loseFlag = false;
+		protected static bool gameFinished = false;
 		protected bool timerRunningFlag = false;
 		protected bool timerFinishedFlag = false;
 		protected bool timerLoopFlag = false;
@@ -80,7 +79,7 @@ namespace UWBsummercampAPI{
 			} else {
 
 				spawnLocation =  new Vector3(0f, 1.32f, -13.64f);
-
+				requestDBsync ();
 			}
 
 
@@ -102,17 +101,42 @@ namespace UWBsummercampAPI{
 
 
 
+			if (!gameFinished){
 
 
 
-
-			if (playerCharacter != null  && !winFlag && !loseFlag) {
+			if (playerCharacter != null) {
 
 				if (updatePlayer) {
 					playerCharacter.GetComponent<coreCharacterBehavior> ().setText (NetworkManager.getPlayerName ());
 					mainCanvas = playerCharacter.GetComponentInChildren<CanvasManager> ();
 					playerCharacter.GetComponent<coreCharacterBehavior> ().setTeam (myTeamID);
 					playerCharacter.GetComponent<coreCharacterBehavior> ().setName (NetworkManager.getPlayerName ());
+
+						switch (myTeamID) {
+
+						case 1:
+							
+							playerCharacter.GetComponent<coreCharacterBehavior> ().changePlayerColor(255f, 0f, 0f);
+							break;
+						case 2:
+							playerCharacter.GetComponent<coreCharacterBehavior> ().changePlayerColor(186f,85f,211f);
+							break;
+						case 3:
+							playerCharacter.GetComponent<coreCharacterBehavior> ().changePlayerColor(0f, 0f, 255f);
+							break;
+						case 4:
+							playerCharacter.GetComponent<coreCharacterBehavior> ().changePlayerColor(0, 255f, 255f);
+							break;
+
+						}
+
+
+
+
+
+
+
 
 
 					updatePlayer = false;
@@ -127,9 +151,9 @@ namespace UWBsummercampAPI{
 			if (!firstBufferSync) {
 				requestDBsync ();
 
-			} else{
+			} else {
 
-				if (firstUpdate && NetworkManager.isInRoom () && !NetworkManager.HostGame ) {
+				if (firstUpdate && NetworkManager.isInRoom () && !NetworkManager.HostGame) {
 
 
 
@@ -227,20 +251,15 @@ namespace UWBsummercampAPI{
 			timerFinishedFlag = false;
 
 			// Determine if timer is finished
-			if (timerRunningFlag)
-			{
+			if (timerRunningFlag) {
 				timer = timer + Time.deltaTime;
 
-				if (timer > timerMax)
-				{
+				if (timer > timerMax) {
 					timerFinishedFlag = true;
-					if (timerLoopFlag)
-					{
+					if (timerLoopFlag) {
 						timer = 0;
-					}
-					else
-					{
-						stopTimer();
+					} else {
+						stopTimer ();
 					}
 				}
 			}
@@ -250,46 +269,44 @@ namespace UWBsummercampAPI{
 			//Handle click to move
 
 
-			if ((Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) || (Input.GetMouseButton(0)))
-			{
+			if ((Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began) || (Input.GetMouseButton (0))) {
 
-			//	Debug.Log ("Clicked");
+				//	Debug.Log ("Clicked");
 				//declare a variable of RaycastHit struct
 				RaycastHit hit;
 
 				//Create a Ray on the tapped / clicked position
-				Ray ray = new Ray();
+				Ray ray = new Ray ();
 
 				//for unity editor
 				#if (UNITY_EDITOR || UNITY_STANDALONE)
-				ray =  GameObject.Find("Camera").GetComponent<Camera>().ScreenPointToRay(Input.mousePosition);
+				ray = GameObject.Find ("Camera").GetComponent<Camera> ().ScreenPointToRay (Input.mousePosition);
 				//for touch device
 				#elif (UNITY_ANDROID || UNITY_IPHONE || UNITY_WP8)
 				ray =  GameObject.Find("Camera").GetComponent<Camera>().ScreenPointToRay(Input.GetTouch(0).position);
 				#endif
 
 				//Check if the ray hits any collider
-				if (Physics.Raycast(ray, out hit))
-				{
+				if (Physics.Raycast (ray, out hit)) {
 					Vector3 destPoint; 
 					//save the click / tap position
 					destPoint = hit.point;
 					//as we do not want to change the y axis value based on touch position, reset it to original y axis value
-					destPoint.y = playerCharacter.transform.position.y - playerCharacter.transform.localScale.y ;
+					destPoint.y = playerCharacter.transform.position.y - playerCharacter.transform.localScale.y;
 
 					playerCharacter.GetComponent<coreCharacterBehavior> ().setClickToMove (destPoint);
 				}
 
 			}
 
-
+		}
 
 		}
 
 		#region Win/Lose Game
 		public void winGame(int _team)
 		{
-			if (winFlag || loseFlag)
+			if (gameFinished)
 				return;
 
 			if (pV != null  && NetworkManager.isInRoom() )
@@ -307,16 +324,17 @@ namespace UWBsummercampAPI{
 		[PunRPC]
 		public void gameOverRPC(int _teamID)
 		{
-			if (!winFlag && !loseFlag)
+			if (!gameFinished)
 			{
-				winFlag = true;
+				gameFinished = true;
 
 				if (_teamID == myTeamID) {
 					congratulate ();
 				} else {
 					//lose game here... dont work in external function.
-					loseFlag = true;
+					gameFinished = true;
 					playerCharacter.GetComponentInChildren<CanvasManager> ().refreshDashboard ("YouLose!");
+					playerCharacter.GetComponent<Renderer>().enabled = false;
 					playerCharacter.SetActive (false);
 
 				}
@@ -325,10 +343,10 @@ namespace UWBsummercampAPI{
 
 		public void loseGame()
 		{
-			if (winFlag || loseFlag)
+			if (gameFinished)
 				return;
 			
-			loseFlag = true;
+			gameFinished = true;
 			playerCharacter.GetComponentInChildren<CanvasManager> ().refreshDashboard ("YouLose!");
 			playerCharacter.SetActive (false);
 		}
@@ -445,7 +463,7 @@ namespace UWBsummercampAPI{
 
 				if (PhotonNetwork.isMasterClient) {
 					// This file PunRPC
-					pV.RPC ("updateDBRPC", PhotonTargets.All, gameBuffer, spawnLocation.x, spawnLocation.y, spawnLocation.z ); // *
+					pV.RPC ("updateDBRPC", PhotonTargets.All, gameBuffer, spawnLocation.x, spawnLocation.y, spawnLocation.z, gameFinished ); // *
 					return true;
 				}
 
@@ -458,10 +476,11 @@ namespace UWBsummercampAPI{
 
 
 		[PunRPC]
-		public void updateDBRPC(Hashtable bufferTMP, float x, float y , float z)
+		public void updateDBRPC(Hashtable bufferTMP, float x, float y , float z, bool gameStatus)
 		{
 			if (!PhotonNetwork.isMasterClient) {
 				spawnLocation = new Vector3 (x, y, z);
+				gameFinished = gameStatus;
 				gameBuffer = bufferTMP;
 				firstBufferSync = true;
 			//	Debug.Log ("buffer updated " + gameBuffer);
