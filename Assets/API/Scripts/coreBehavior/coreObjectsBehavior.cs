@@ -24,6 +24,7 @@ public class coreObjectsBehavior : MonoBehaviour
     private GameObject lastSpawned = null;
     private float timer = 0;
     private int timerMax = 10;
+	private gameManagerBehavior GameManager;
 
     // Constant Variables
     PhotonView pV;
@@ -33,6 +34,25 @@ public class coreObjectsBehavior : MonoBehaviour
     void Start()
     {
         pV = transform.GetComponent<PhotonView>();
+
+
+
+
+
+			GameObject _GameManager = GameObject.Find("GameManager");
+			if (_GameManager == null){
+				_GameManager = new GameObject ();
+				_GameManager.name = "GameManager";
+				_GameManager.AddComponent<gameManagerBehavior> ();
+			}
+
+
+			GameManager = _GameManager.GetComponent<gameManagerBehavior>();
+
+
+
+
+
 
         MethodInfo method = this.GetType().GetMethod("buildGame", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
         if (method != null)
@@ -485,38 +505,38 @@ public class coreObjectsBehavior : MonoBehaviour
 
     public void setLevelTimer(int timerLength, bool makeRepeat = false)
     {
-        gameManagerBehavior.instance.setTimer(timerLength, makeRepeat);
+			GameManager.setTimer(timerLength, makeRepeat);
     }
 
     public void makeLevelTimerRepeat(bool makeRepeat)
     {
-        gameManagerBehavior.instance.makeTimerRepeat(makeRepeat);
+			GameManager.makeTimerRepeat(makeRepeat);
     }
 
     public void startLevelTimer()
     {
-        gameManagerBehavior.instance.startTimer();
+			GameManager.startTimer();
     }
 
     public void stopLevelTimer()
     {
-        gameManagerBehavior.instance.stopTimer();
+			GameManager.stopTimer();
     }
 
     public bool levelTimeIsUp()
     {
-        return gameManagerBehavior.instance.timeIsUp();
+			return GameManager.timeIsUp();
     }
 
     public bool levelTimerIsRunning()
     {
-        return gameManagerBehavior.instance.timerIsRunning(); ;
+			return GameManager.timerIsRunning(); 
     }
 
 
 	public void setspawnLocation()
 	{
-			gameManagerBehavior.instance.setspawnLocation (this.transform.position);
+			GameManager.setMainSpawnLocation(this.transform.position);
 	}
     #endregion
 
