@@ -6,56 +6,55 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 using UnityEngine.UI;
 
 namespace UWBsummercampAPI{
-	
+
 	public class gameManagerBehavior : MonoBehaviour
-{
-    // Flags
-    protected static bool winFlag = false;
-    protected static bool loseFlag = false;
-    protected bool timerRunningFlag = false;
-    protected bool timerFinishedFlag = false;
-    protected bool timerLoopFlag = false;
-	protected bool readyToStart = false;
+	{
+		// Flags
+		protected static bool winFlag = false;
+		protected static bool loseFlag = false;
+		protected bool timerRunningFlag = false;
+		protected bool timerFinishedFlag = false;
+		protected bool timerLoopFlag = false;
+		protected bool readyToStart = false;
 
-    // Dynamic Variables
-    protected static int points;
-    protected static int goalPoints;
-    private float timer = 0;
-    private int timerMax = 10;
-	private bool isGameRunning;
+		// Dynamic Variables
+		protected static int points;
+		protected static int goalPoints;
+		private float timer = 0;
+		private int timerMax = 10;
+		private bool isGameRunning;
 
-    // Constant Variables
-    public static gameManagerBehavior instance;
-	static PhotonView pV;//= this.gameObject.AddComponent<PhotonView>();
-	static PhotonPlayer pP = new PhotonPlayer(true,0,"PhotonPlayer");
-	static networkManagerSummerCamp NetworkManager;
-	private Hashtable gameBuffer = new Hashtable();
-	
-	private int myTeamID = 0;
-	private bool firstUpdate = true;
-	private bool updatePlayer = false;
-	private bool customPropertyChanged = false;
-	private GameObject playerCharacter;
-	private string device;
-	private Vector3 spawnLocation;
+		// Constant Variables
+		public static gameManagerBehavior instance;
+		static PhotonView pV;//= this.gameObject.AddComponent<PhotonView>();
+		static PhotonPlayer pP = new PhotonPlayer(true,0,"PhotonPlayer");
+		static networkManagerSummerCamp NetworkManager;
+		private Hashtable gameBuffer = new Hashtable();
 
+		private int myTeamID = 0;
+		private bool firstUpdate = true;
+		private bool updatePlayer = false;
+		private bool customPropertyChanged = false;
+		private GameObject playerCharacter;
+		private string device;
+		private Vector3 spawnLocation;
 
-	//Tmp for dev (delete later)
+		//Tmp for dev (delete later)
 		private CanvasManager mainCanvas = new CanvasManager();
 
 
 
 
-    // Use this for initialization
-    void Start ()
-    {
-			
+		// Use this for initialization
+		void Start ()
+		{
+
 
 
 			pV = gameObject.AddComponent<PhotonView> ();
 
 			pV.viewID = 99999;
-		
+
 
 
 			NetworkManager = GameObject.Find ("NetworkManager").GetComponent<networkManagerSummerCamp>();
@@ -74,9 +73,6 @@ namespace UWBsummercampAPI{
 				updateCache ("goalPoints", goalPoints);
 
 				points = 0;
-				spawnLocation = new Vector3 (0f, 1.32f, -13.64f);
-
-
 
 			} else {
 				NetworkManager.joinRoom ();
@@ -84,21 +80,21 @@ namespace UWBsummercampAPI{
 
 
 
-		
-        
-        instance = this;
+
+
+			instance = this;
 
 
 
 
-//read or create initial networked database
+			//read or create initial networked database
 
 
-    }
-	
+		}
 
-	// Update is called once per frame
-	void Update ()
+
+		// Update is called once per frame
+		void Update ()
 		{
 
 
@@ -121,40 +117,40 @@ namespace UWBsummercampAPI{
 			if (firstUpdate && NetworkManager.isInRoom()) {
 
 
+
+				Vector3 spawningPosition;
 				Quaternion spawningRotation;
 
 
-					List<Component> tmpList = new List<Component> ();
-					tmpList.Add (this.gameObject.GetComponent<gameManagerBehavior> ());
-					pV.ObservedComponents = tmpList;
+				List<Component> tmpList = new List<Component> ();
+				tmpList.Add (this.gameObject.GetComponent<gameManagerBehavior> ());
+				pV.ObservedComponents = tmpList;
 
-					//if team doesn't exist this will create point entry for it and avour null exception
-					addPoints (0, myTeamID);
+				//if team doesn't exist this will create point entry for it and avour null exception
+				addPoints (0, myTeamID);
 
-					goalPoints = queryCache ("goalPoints");
-					points = queryCache (myTeamID.ToString () + "Points");
-					
-					
+				goalPoints = queryCache ("goalPoints");
+				points = queryCache (myTeamID.ToString () + "Points");
 
-					firstUpdate = false;
+				firstUpdate = false;
 
-					if (! NetworkManager.HostGame) {
-						//photon instantiate and place in playerCharacter
+				if (! NetworkManager.HostGame) {
+					//photon instantiate and place in playerCharacter
 
 
-					spawnLocation = new Vector3 (float.Parse(queryCache ("spawnX").ToString()) , float.Parse(queryCache ("spawnY").ToString()) , float.Parse(queryCache ("spawnZ").ToString() ) );
-
-//For some reason the Camera.main is not working...
-//						Vector3 spawningPosition = Camera.main.gameObject.transform.position;
-//						Quaternion spawningRotation = Camera.main.gameObject.transform.rotation;
 
 
-				
+					//For some reason the Camera.main is not working...
+					//						Vector3 spawningPosition = Camera.main.gameObject.transform.position;
+					//						Quaternion spawningRotation = Camera.main.gameObject.transform.rotation;
+
+
+
 					UWBPhotonTransformView [] listOfUWBPhotonOBJ = GameObject.FindObjectsOfType<UWBPhotonTransformView> ();
 
 					foreach (UWBPhotonTransformView UWBPhoton in listOfUWBPhotonOBJ)
 					{
-						
+
 						UWBPhoton.gameObject.GetComponent<PhotonView>().RPC("RequestColorRPC", PhotonTargets.MasterClient); 
 					}
 
@@ -164,20 +160,15 @@ namespace UWBsummercampAPI{
 					case "VR":
 						print ("VR was choosed!!");
 
-						//spawningPosition = GameObject.Find ("Camera").transform.position;
+						spawningPosition = GameObject.Find ("Camera").transform.position;
 						spawningRotation = GameObject.Find ("Camera").transform.rotation;
 						GameObject.Destroy (GameObject.Find ("Camera"));
 
+						GameObject CameraRig = Instantiate (Resources.Load ("[CameraRig]"), spawningPosition, spawningRotation) as GameObject;
+						GameObject ViveAvatar = Instantiate (Resources.Load ("ViveAvatar"), spawningPosition, spawningRotation) as GameObject;
+						spawningPosition = new Vector3 (spawningPosition.x + 2f, spawningPosition.y, spawningPosition.z);
 
-						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawnLocation, spawningRotation, 0);
-
-						spawnLocation = new Vector3 (spawnLocation.x - 2f, spawnLocation.y, spawnLocation.z);
-
-						GameObject CameraRig = Instantiate (Resources.Load ("[CameraRig]"), spawnLocation, spawningRotation) as GameObject;
-						GameObject ViveAvatar = Instantiate (Resources.Load ("ViveAvatar"), spawnLocation, spawningRotation) as GameObject;
-
-
-
+						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
 						updatePlayer = true;
 
 
@@ -189,9 +180,9 @@ namespace UWBsummercampAPI{
 						print ("Normal PC Stuff");
 
 
-						//spawningPosition = GameObject.Find ("Camera").transform.position;
+						spawningPosition = GameObject.Find ("Camera").transform.position;
 						spawningRotation = GameObject.Find ("Camera").transform.rotation;
-						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawnLocation, spawningRotation, 0);
+						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
 						playerCharacter.AddComponent<cameraFollower> ().OnStartFollowing ();
 						playerCharacter.GetComponent<coreCharacterBehavior> ().setTeam (myTeamID);
 						updatePlayer = true;
@@ -199,48 +190,48 @@ namespace UWBsummercampAPI{
 						break;
 					}
 
-					}
+				}
 
 
 			}
 
 
 
-					
 
 
 
-		
 
 
-	
+
+
+
 
 			if (points >= goalPoints && readyToStart)
-        {
-           // winGame();
-        }
+			{
+				// winGame();
+			}
 
-        // Consume timer event
-        timerFinishedFlag = false;
+			// Consume timer event
+			timerFinishedFlag = false;
 
-        // Determine if timer is finished
-        if (timerRunningFlag)
-        {
-            timer = timer + Time.deltaTime;
+			// Determine if timer is finished
+			if (timerRunningFlag)
+			{
+				timer = timer + Time.deltaTime;
 
-            if (timer > timerMax)
-            {
-                timerFinishedFlag = true;
-                if (timerLoopFlag)
-                {
-                    timer = 0;
-                }
-                else
-                {
-                    stopTimer();
-                }
-            }
-        }
+				if (timer > timerMax)
+				{
+					timerFinishedFlag = true;
+					if (timerLoopFlag)
+					{
+						timer = 0;
+					}
+					else
+					{
+						stopTimer();
+					}
+				}
+			}
 
 
 
@@ -281,70 +272,70 @@ namespace UWBsummercampAPI{
 
 
 
-    }
+		}
 
-    #region Win/Lose Game
-    public void winGame()
-    {
-        if (winFlag || loseFlag)
-            return;
+		#region Win/Lose Game
+		public void winGame()
+		{
+			if (winFlag || loseFlag)
+				return;
 
-        if (pV != null  && NetworkManager.isInRoom() )
-        {
-            // This file PunRPC
-            pV.RPC("winGameRPC", PhotonTargets.All); // *
-        }
-        else
-        {
-            // Make this character win
-            winGameRPC();
-        }
-    }
+			if (pV != null  && NetworkManager.isInRoom() )
+			{
+				// This file PunRPC
+				pV.RPC("winGameRPC", PhotonTargets.All); // *
+			}
+			else
+			{
+				// Make this character win
+				winGameRPC();
+			}
+		}
 
-    [PunRPC]
-    public void winGameRPC()
-    {
-        if (!winFlag && !loseFlag)
-        {
-            winFlag = true;
-            Instantiate(Resources.Load("WinCanvas"));
-        }
-    }
+		[PunRPC]
+		public void winGameRPC()
+		{
+			if (!winFlag && !loseFlag)
+			{
+				winFlag = true;
+				Instantiate(Resources.Load("WinCanvas"));
+			}
+		}
 
-    public void loseGame()
-    {
-        if (winFlag || loseFlag)
-            return;
+		public void loseGame()
+		{
+			if (winFlag || loseFlag)
+				return;
 
-        if (pV != null  && NetworkManager.isInRoom() )
-        {
-            // This file PunRPC
-            pV.RPC("loseGameRPC", PhotonTargets.All); // *
-        }
-        else
-        {
-            // Make this character win
-            loseGameRPC();
-        }
-    }
+			if (pV != null  && NetworkManager.isInRoom() )
+			{
+				// This file PunRPC
+				pV.RPC("loseGameRPC", PhotonTargets.All); // *
+			}
+			else
+			{
+				// Make this character win
+				loseGameRPC();
+			}
+		}
 
-    [PunRPC]
-    public void loseGameRPC()
-    {
-        if (!winFlag && !loseFlag)
-        {
-            loseFlag = true;
-            Instantiate(Resources.Load("LoseCanvas"));
-        }
-    }
-#endregion
+		[PunRPC]
+		public void loseGameRPC()
+		{
+			if (!winFlag && !loseFlag)
+			{
+				loseFlag = true;
+				Instantiate(Resources.Load("LoseCanvas"));
+			}
+		}
+		#endregion
 
-    #region Points
+		#region Points
 		public void addPoints(int pointsTMP = 10, int teamID = 0)
-    {
+		{
 			int totalPoints = 0;
 			try{
-			totalPoints = pointsTMP + queryCache (NetworkManager.teamID.ToString () + "Points");
+				totalPoints = pointsTMP + queryCache (NetworkManager.teamID.ToString () + "Points");
 			}
 			catch (System.Exception e)
 			{
@@ -353,21 +344,21 @@ namespace UWBsummercampAPI{
 			}
 
 
-        if (pV != null  && NetworkManager.isInRoom() )
-        {
-            // This file PunRPC
+			if (pV != null  && NetworkManager.isInRoom() )
+			{
+				// This file PunRPC
 				pV.RPC("setPointsRPC", PhotonTargets.All, totalPoints, teamID); // *
-        }
-        else
-        {
+			}
+			else
+			{
 				setPointsRPC(totalPoints, teamID);
-        }
-    }
+			}
+		}
 
 
-    [PunRPC]
+		[PunRPC]
 		public void setPointsRPC(int pointTotal, int teamID)
-    {
+		{
 			if (teamID == myTeamID) {
 				points = pointTotal;
 			}
@@ -378,27 +369,13 @@ namespace UWBsummercampAPI{
 			}
 
 			Debug.Log("addpoints to "+teamID);
-      //  points = pointTotal;
-    }
-
-    #endregion
-
-
-		#region Location
-		public void setspawnLocation( Vector3 newSpawnLocation){
-
-			spawnLocation = newSpawnLocation;
-
-			updateCache( "spawnX", int.Parse (newSpawnLocation.x.ToString ()));
-			updateCache( "spawnY", int.Parse (newSpawnLocation.y.ToString ()));
-			updateCache( "spawnZ", int.Parse (newSpawnLocation.z.ToString ()));
-
-
+			//  points = pointTotal;
 		}
 
-
-
 		#endregion
+
+
+
 
 
 
@@ -410,9 +387,9 @@ namespace UWBsummercampAPI{
 			if (pV != null  && NetworkManager.isInRoom()  )
 			{
 
-					pV.RPC ("syncDBRPC", PhotonTargets.All); // *
-					return true;
-				}
+				pV.RPC ("syncDBRPC", PhotonTargets.All); // *
+				return true;
+			}
 
 
 			return false;
@@ -511,41 +488,54 @@ namespace UWBsummercampAPI{
 
 
 
-    #region Timer
-    /* Should these be networked? There will be serious lag if they are. */
-    public void setTimer(int timerLength, bool makeRepeat = false)
-    {
-        timerMax = timerLength;
-        makeTimerRepeat(makeRepeat);
-    }
+		#region Location
+		public void setspawnLocation( Vector3 newSpawnLocation){
 
-    public void makeTimerRepeat(bool makeRepeat)
-    {
-        timerLoopFlag = makeRepeat;
-    }
+			spawnLocation = newSpawnLocation;
 
-    public void startTimer()
-    {
-        Debug.Log("Start Timer");
-        timerRunningFlag = true;
-    }
+		}
 
-    public void stopTimer()
-    {
-        timerRunningFlag = false;
-    }
 
-    public bool timeIsUp()
-    {
-        // Event is consumed in update function
-        return timerFinishedFlag;
-    }
 
-    public bool timerIsRunning()
-    {
-        return timerRunningFlag;
-    }
-    #endregion
+		#endregion
+
+
+
+		#region Timer
+		/* Should these be networked? There will be serious lag if they are. */
+		public void setTimer(int timerLength, bool makeRepeat = false)
+		{
+			timerMax = timerLength;
+			makeTimerRepeat(makeRepeat);
+		}
+
+		public void makeTimerRepeat(bool makeRepeat)
+		{
+			timerLoopFlag = makeRepeat;
+		}
+
+		public void startTimer()
+		{
+			Debug.Log("Start Timer");
+			timerRunningFlag = true;
+		}
+
+		public void stopTimer()
+		{
+			timerRunningFlag = false;
+		}
+
+		public bool timeIsUp()
+		{
+			// Event is consumed in update function
+			return timerFinishedFlag;
+		}
+
+		public bool timerIsRunning()
+		{
+			return timerRunningFlag;
+		}
+		#endregion
 
 
 
@@ -556,10 +546,10 @@ namespace UWBsummercampAPI{
 
 		private void updateCache(string key, int value){
 
-				gameBuffer[key] = value;
+			gameBuffer[key] = value;
 			updateNetworkedCache ();
 
-		
+
 
 		}
 
@@ -568,11 +558,11 @@ namespace UWBsummercampAPI{
 
 
 			return (int) gameBuffer[key] ;
-			}
+		}
 
 
 
-	private void updateNetworkedCache (){
+		private void updateNetworkedCache (){
 
 			//custom properties not really working...
 			//pP.SetCustomProperties(gameBuffer, gameBuffer);
@@ -582,20 +572,49 @@ namespace UWBsummercampAPI{
 
 
 
-	}
+		}
 
-	//updates everytime customproperties are update on the network
-	//this force us to have a fresh local copy at every change 
-	public void OnPhotonPlayerPropertiesChanged(object[] playerAndUpdatedProps)
-	{
+		//updates everytime customproperties are update on the network
+		//this force us to have a fresh local copy at every change 
+		public void OnPhotonPlayerPropertiesChanged(object[] playerAndUpdatedProps)
+		{
 
 			customPropertyChanged = true;
 			PhotonPlayer player = playerAndUpdatedProps[0] as PhotonPlayer;
 			gameBuffer = playerAndUpdatedProps[1] as Hashtable;
 
-	}
-	
-	#endregion
+		}
+
+		#endregion
 
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
