@@ -106,7 +106,7 @@ namespace UWBsummercampAPI{
 
 
 
-			if (playerCharacter != null) {
+			if (playerCharacter != null  && !winFlag && !loseFlag) {
 
 				if (updatePlayer) {
 					playerCharacter.GetComponent<coreCharacterBehavior> ().setText (NetworkManager.getPlayerName ());
@@ -117,6 +117,7 @@ namespace UWBsummercampAPI{
 
 					updatePlayer = false;
 				}
+
 				mainCanvas.refreshDashboard ("myTeam: " + myTeamID + "\n Goal: " + goalPoints + "\n Points: " + points);
 
 			}
@@ -215,11 +216,12 @@ namespace UWBsummercampAPI{
 
 
 
-
-			if (points >= goalPoints && readyToStart)
+/*Player trigger win game...
+			if (points >= goalPoints && firstBufferSync)
 			{
-				// winGame();
-			}
+				
+				 winGame();
+			}*/
 
 			// Consume timer event
 			timerFinishedFlag = false;
@@ -285,7 +287,7 @@ namespace UWBsummercampAPI{
 		}
 
 		#region Win/Lose Game
-		public void winGame()
+		public void winGame(int _team)
 		{
 			if (winFlag || loseFlag)
 				return;
@@ -293,22 +295,31 @@ namespace UWBsummercampAPI{
 			if (pV != null  && NetworkManager.isInRoom() )
 			{
 				// This file PunRPC
-				pV.RPC("winGameRPC", PhotonTargets.All); // *
+				pV.RPC("gameOverRPC", PhotonTargets.All, _team); // *
 			}
 			else
 			{
 				// Make this character win
-				winGameRPC();
+				gameOverRPC(myTeamID);
 			}
 		}
 
 		[PunRPC]
-		public void winGameRPC()
+		public void gameOverRPC(int _teamID)
 		{
 			if (!winFlag && !loseFlag)
 			{
 				winFlag = true;
-				Instantiate(Resources.Load("WinCanvas"));
+
+				if (_teamID == myTeamID) {
+					congratulate ();
+				} else {
+					//lose game here... dont work in external function.
+					loseFlag = true;
+					playerCharacter.GetComponentInChildren<CanvasManager> ().refreshDashboard ("YouLose!");
+					playerCharacter.SetActive (false);
+
+				}
 			}
 		}
 
@@ -316,31 +327,29 @@ namespace UWBsummercampAPI{
 		{
 			if (winFlag || loseFlag)
 				return;
-
-			if (pV != null  && NetworkManager.isInRoom() )
-			{
-				// This file PunRPC
-				pV.RPC("loseGameRPC", PhotonTargets.All); // *
-			}
-			else
-			{
-				// Make this character win
-				loseGameRPC();
-			}
+			
+			loseFlag = true;
+			playerCharacter.GetComponentInChildren<CanvasManager> ().refreshDashboard ("YouLose!");
+			playerCharacter.SetActive (false);
 		}
 
-		[PunRPC]
-		public void loseGameRPC()
-		{
-			if (!winFlag && !loseFlag)
-			{
-				loseFlag = true;
-				Instantiate(Resources.Load("LoseCanvas"));
-			}
+
+		public void congratulate(){
+			playerCharacter.GetComponentInChildren<CanvasManager> ().refreshDashboard ("COngrats!!");
+
+
 		}
 		#endregion
 
 		#region Points
+
+
+
+		public int checkPoints(int team){
+			return queryCache (team.ToString () + "Points");
+		}
+
+
 		public void addPoints(int pointsTMP = 10, int teamID = 0)
 		{
 
@@ -367,24 +376,7 @@ namespace UWBsummercampAPI{
 
 
 			//update locally
-			if (teamID == myTeamID) {/*
-
-				string key = teamID.ToString() ;
-				key = key + "Points";
-				try{
-					points = pointsTMP + (int) gameBuffer[key];
-
-				}
-				catch (System.Exception e)
-				{
-					Debug.Log ("cache didn't exist yet...");
-					points = pointsTMP;
-				}
-
-				points = points + pointsTMP;
-
-
-*/
+			if (teamID == myTeamID) {
 				points = points + pointsAdded;
 			}
 
@@ -485,6 +477,15 @@ namespace UWBsummercampAPI{
 
 
 		#region Goals
+
+
+		public int getGoal(){
+
+			return goalPoints;
+
+		}
+
+
 
 
 		public void setGoal(int goalTMP = 10)

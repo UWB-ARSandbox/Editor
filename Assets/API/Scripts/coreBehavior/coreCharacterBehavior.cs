@@ -479,59 +479,63 @@ public class coreCharacterBehavior : MonoBehaviour
     public void winGame()
     {
         stopMoving();
-        gameManagerBehavior.instance.winGame();
+			GameManager.winGame(teamID);
     }
 
     public void loseGame()
     {
         stopMoving();
-        gameManagerBehavior.instance.loseGame();
+			GameManager.loseGame();
     }
 
     public void addPoints(int pointsTMP = 10)
     {
 			//Debug.Log ("Character here ID: " + teamID.ToString ());
-			gameManagerBehavior.instance.addPoints(pointsTMP, this.teamID);
+			if (pointsTMP + GameManager.checkPoints (teamID) >= GameManager.getGoal ()) {
+				GameManager.winGame (teamID);
+			}
+
+				GameManager.addPoints(pointsTMP, this.teamID);
     }
 
     public void removePoints(int pointsTMP = 10)
     {
-			gameManagerBehavior.instance.addPoints(-pointsTMP, teamID);
+					GameManager.addPoints(-pointsTMP, teamID);
     }
 
     protected void setGoal(int goalPointsTMP)
     {
-        gameManagerBehavior.instance.setGoal(goalPointsTMP);
+					GameManager.setGoal(goalPointsTMP);
     }
 
     public void setLevelTimer(int timerLength, bool makeRepeat = false)
     {
-        gameManagerBehavior.instance.setTimer(timerLength, makeRepeat);
+        GameManager.setTimer(timerLength, makeRepeat);
     }
 
     public void makeLevelTimerRepeat(bool makeRepeat)
     {
-        gameManagerBehavior.instance.makeTimerRepeat(makeRepeat);
+        GameManager.makeTimerRepeat(makeRepeat);
     }
 
     public void startLevelTimer()
     {
-        gameManagerBehavior.instance.startTimer();
+        GameManager.startTimer();
     }
 
     public void stopLevelTimer()
     {
-        gameManagerBehavior.instance.stopTimer();
+        GameManager.stopTimer();
     }
 
     public bool levelTimeIsUp()
     {
-        return gameManagerBehavior.instance.timeIsUp();
+        return GameManager.timeIsUp();
     }
 
     public bool levelTimerIsRunning()
     {
-        return gameManagerBehavior.instance.timerIsRunning(); ;
+        return GameManager.timerIsRunning(); ;
     }
     #endregion
 
