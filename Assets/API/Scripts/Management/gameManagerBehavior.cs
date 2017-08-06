@@ -251,7 +251,7 @@ namespace UWBsummercampAPI{
 			if ((Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) || (Input.GetMouseButton(0)))
 			{
 
-				Debug.Log ("Clicked");
+			//	Debug.Log ("Clicked");
 				//declare a variable of RaycastHit struct
 				RaycastHit hit;
 
@@ -472,7 +472,7 @@ namespace UWBsummercampAPI{
 				spawnLocation = new Vector3 (x, y, z);
 				gameBuffer = bufferTMP;
 				firstBufferSync = true;
-				Debug.Log ("buffer updated " + gameBuffer);
+			//	Debug.Log ("buffer updated " + gameBuffer);
 			}
 		}
 
@@ -506,7 +506,7 @@ namespace UWBsummercampAPI{
 		[PunRPC]
 		public void setGoalRPC(int newGoal)
 		{
-			Debug.Log("new Goal Set: "+newGoal);
+			//Debug.Log("new Goal Set: "+newGoal);
 
 			//update local variable and networked cache
 			goalPoints = newGoal;
@@ -539,8 +539,6 @@ namespace UWBsummercampAPI{
 		#region Location
 		public void setMainSpawnLocation( Vector3 newSpawnLocation){
 
-			Debug.Log ("SSSSSPAAAWWW" );
-			Debug.Log (newSpawnLocation.ToString());
 			spawnLocation = newSpawnLocation;
 
 		}
@@ -597,7 +595,7 @@ namespace UWBsummercampAPI{
 		private void updateCache(string key, int value){
 
 
-			Debug.Log ("updateCache key:" + key + " value: "+value.ToString());
+		//	Debug.Log ("updateCache key:" + key + " value: "+value.ToString());
 			gameBuffer[key] = value;
 			updateNetworkedCache ();
 

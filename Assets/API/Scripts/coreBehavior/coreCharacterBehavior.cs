@@ -395,7 +395,7 @@ public class coreCharacterBehavior : MonoBehaviour
 		[PunRPC]
 		public void setPlayerNameRPC(string _playerName)
 		{
-			Debug.Log ("Player:" + name + " set name");
+			//Debug.Log ("Player:" + name + " set name");
 			playerName = _playerName;
 		}
 
@@ -419,7 +419,7 @@ public class coreCharacterBehavior : MonoBehaviour
 		[PunRPC]
 		public void setTeamRPC(int newTeam)
 		{
-			Debug.Log ("Player:" + name + " settedTeam:" + teamID);
+			//Debug.Log ("Player:" + name + " settedTeam:" + teamID);
 			teamID = newTeam;
 		}
 
@@ -490,7 +490,7 @@ public class coreCharacterBehavior : MonoBehaviour
 
     public void addPoints(int pointsTMP = 10)
     {
-			Debug.Log ("Character here ID: " + teamID.ToString ());
+			//Debug.Log ("Character here ID: " + teamID.ToString ());
 			gameManagerBehavior.instance.addPoints(pointsTMP, this.teamID);
     }
 
