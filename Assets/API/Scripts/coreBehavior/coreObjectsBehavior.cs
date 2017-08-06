@@ -478,7 +478,7 @@ public class coreObjectsBehavior : MonoBehaviour
 			if (iteractionObj == null)
 			{
 				Debug.LogWarning("Cannot check points: No player has been set yet!");
-				return false;
+				return 0;
 			}
 			else
 			{
