@@ -40,7 +40,7 @@ namespace UWBsummercampAPI{
 		private Vector3 spawnLocation;
 
 		//Tmp for dev (delete later)
-		private CanvasManager mainCanvas = new CanvasManager();
+		private CanvasManager mainCanvas;// = new CanvasManager();
 
 
 
@@ -76,6 +76,7 @@ namespace UWBsummercampAPI{
 
 			} else {
 				NetworkManager.joinRoom ();
+				requestDBsync ();
 			}
 
 
@@ -98,13 +99,18 @@ namespace UWBsummercampAPI{
 		{
 
 
+
+
+
+
+
 			if (playerCharacter != null) {
 
 				if (updatePlayer) {
 					playerCharacter.GetComponent<coreCharacterBehavior> ().setText (NetworkManager.getPlayerName ());
 					mainCanvas = playerCharacter.GetComponentInChildren<CanvasManager> ();
 					playerCharacter.GetComponent<coreCharacterBehavior> ().setTeam (myTeamID);
-					playerCharacter.GetComponent<coreCharacterBehavior> ().setName(NetworkManager.getPlayerName ());
+					playerCharacter.GetComponent<coreCharacterBehavior> ().setName (NetworkManager.getPlayerName ());
 
 
 					updatePlayer = false;
@@ -114,7 +120,7 @@ namespace UWBsummercampAPI{
 			}
 
 			//fix networking:
-			if (firstUpdate && NetworkManager.isInRoom()) {
+			if (firstUpdate && NetworkManager.isInRoom () && !NetworkManager.HostGame) {
 
 
 
@@ -134,67 +140,63 @@ namespace UWBsummercampAPI{
 
 				firstUpdate = false;
 
-				if (! NetworkManager.HostGame) {
-					//photon instantiate and place in playerCharacter
 
 
 
 
-					//For some reason the Camera.main is not working...
-					//						Vector3 spawningPosition = Camera.main.gameObject.transform.position;
-					//						Quaternion spawningRotation = Camera.main.gameObject.transform.rotation;
+				//For some reason the Camera.main is not working...
+				//						Vector3 spawningPosition = Camera.main.gameObject.transform.position;
+				//						Quaternion spawningRotation = Camera.main.gameObject.transform.rotation;
 
 
 
-					UWBPhotonTransformView [] listOfUWBPhotonOBJ = GameObject.FindObjectsOfType<UWBPhotonTransformView> ();
+				UWBPhotonTransformView[] listOfUWBPhotonOBJ = GameObject.FindObjectsOfType<UWBPhotonTransformView> ();
 
-					foreach (UWBPhotonTransformView UWBPhoton in listOfUWBPhotonOBJ)
-					{
+				foreach (UWBPhotonTransformView UWBPhoton in listOfUWBPhotonOBJ) {
 
-						UWBPhoton.gameObject.GetComponent<PhotonView>().RPC("RequestColorRPC", PhotonTargets.MasterClient); 
-					}
-
-
-					switch (NetworkManager.getDevice())
-					{
-					case "VR":
-						print ("VR was choosed!!");
-
-						spawningPosition = GameObject.Find ("Camera").transform.position;
-						spawningRotation = GameObject.Find ("Camera").transform.rotation;
-						GameObject.Destroy (GameObject.Find ("Camera"));
-
-						GameObject CameraRig = Instantiate (Resources.Load ("[CameraRig]"), spawningPosition, spawningRotation) as GameObject;
-						GameObject ViveAvatar = Instantiate (Resources.Load ("ViveAvatar"), spawningPosition, spawningRotation) as GameObject;
-						spawningPosition = new Vector3 (spawningPosition.x + 2f, spawningPosition.y, spawningPosition.z);
-
-						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
-						updatePlayer = true;
-
-
-						break;
-					case "Tango":
-						print ("Tango Tango Tango!!!");
-						break;
-					default:
-						print ("Normal PC Stuff");
-
-
-						spawningPosition = GameObject.Find ("Camera").transform.position;
-						spawningRotation = GameObject.Find ("Camera").transform.rotation;
-						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
-						playerCharacter.AddComponent<cameraFollower> ().OnStartFollowing ();
-						playerCharacter.GetComponent<coreCharacterBehavior> ().setTeam (myTeamID);
-						updatePlayer = true;
-
-						break;
-					}
-
+					UWBPhoton.gameObject.GetComponent<PhotonView> ().RPC ("RequestColorRPC", PhotonTargets.MasterClient); 
 				}
 
 
-			}
+				switch (NetworkManager.getDevice ()) {
+				case "VR":
+					print ("VR was choosed!!");
 
+					spawningPosition = GameObject.Find ("Camera").transform.position;
+					spawningRotation = GameObject.Find ("Camera").transform.rotation;
+					GameObject.Destroy (GameObject.Find ("Camera"));
+
+					GameObject CameraRig = Instantiate (Resources.Load ("[CameraRig]"), spawningPosition, spawningRotation) as GameObject;
+					GameObject ViveAvatar = Instantiate (Resources.Load ("ViveAvatar"), spawningPosition, spawningRotation) as GameObject;
+					spawningPosition = new Vector3 (spawningPosition.x + 2f, spawningPosition.y, spawningPosition.z);
+
+					playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
+					updatePlayer = true;
+
+
+					break;
+				case "Tango":
+					print ("Tango Tango Tango!!!");
+					break;
+				default:
+					print ("Normal PC Stuff");
+
+
+					spawningPosition = GameObject.Find ("Camera").transform.position;
+					spawningRotation = GameObject.Find ("Camera").transform.rotation;
+					playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawningPosition, spawningRotation, 0);
+					playerCharacter.AddComponent<cameraFollower> ().OnStartFollowing ();
+					playerCharacter.GetComponent<coreCharacterBehavior> ().setTeam (myTeamID);
+					updatePlayer = true;
+
+					break;
+				}
+
+
+
+
+			}
+		
 
 
 
@@ -333,38 +335,74 @@ namespace UWBsummercampAPI{
 		#region Points
 		public void addPoints(int pointsTMP = 10, int teamID = 0)
 		{
-			int totalPoints = 0;
-			try{
-				totalPoints = pointsTMP + queryCache (NetworkManager.teamID.ToString () + "Points");
-			}
-			catch (System.Exception e)
-			{
-				Debug.Log ("cache didn't exist yet...");
-				totalPoints = 0;
-			}
 
 
 			if (pV != null  && NetworkManager.isInRoom() )
 			{
 				// This file PunRPC
-				pV.RPC("setPointsRPC", PhotonTargets.All, totalPoints, teamID); // *
+				pV.RPC("addPointsRPC", PhotonTargets.All, pointsTMP, teamID); // *
 			}
 			else
 			{
-				setPointsRPC(totalPoints, teamID);
+				addPointsRPC(pointsTMP, teamID);
 			}
+
+		
+		
+		
 		}
 
 
 		[PunRPC]
-		public void setPointsRPC(int pointTotal, int teamID)
+		public void addPointsRPC(int pointsAdded, int teamID)
 		{
-			if (teamID == myTeamID) {
-				points = pointTotal;
+
+
+			//update locally
+			if (teamID == myTeamID) {/*
+
+				string key = teamID.ToString() ;
+				key = key + "Points";
+				try{
+					points = pointsTMP + (int) gameBuffer[key];
+
+				}
+				catch (System.Exception e)
+				{
+					Debug.Log ("cache didn't exist yet...");
+					points = pointsTMP;
+				}
+
+				points = points + pointsTMP;
+
+
+*/
+				points = points + pointsAdded;
 			}
 
-			if (NetworkManager.HostGame) {
-				updateCache (teamID.ToString () + "Points", pointTotal);
+
+
+
+
+
+			if (PhotonNetwork.isMasterClient ) {
+
+
+				int totalPoints;
+
+				string key = teamID.ToString() ;
+				key = key + "Points";
+				try{
+					totalPoints = pointsAdded + (int) gameBuffer[key];
+
+				}
+				catch (System.Exception e)
+				{
+					Debug.Log ("cache didn't exist yet...");
+					totalPoints = pointsAdded;
+				}
+
+				updateCache (teamID.ToString () + "Points", totalPoints);
 
 			}
 
@@ -405,7 +443,7 @@ namespace UWBsummercampAPI{
 			{
 
 
-				if (NetworkManager.HostGame) {
+				if (PhotonNetwork.isMasterClient) {
 					// This file PunRPC
 					pV.RPC ("updateDBRPC", PhotonTargets.All, gameBuffer); // *
 					return true;
@@ -422,7 +460,7 @@ namespace UWBsummercampAPI{
 		[PunRPC]
 		public void updateDBRPC(Hashtable bufferTMP)
 		{
-			if (!NetworkManager.HostGame) {
+			if (!PhotonNetwork.isMasterClient) {
 				gameBuffer = bufferTMP;
 				Debug.Log ("buffer updated " + gameBuffer);
 			}
@@ -546,6 +584,8 @@ namespace UWBsummercampAPI{
 
 		private void updateCache(string key, int value){
 
+
+			Debug.Log ("updateCache key:" + key + " value: "+value.ToString());
 			gameBuffer[key] = value;
 			updateNetworkedCache ();
 
