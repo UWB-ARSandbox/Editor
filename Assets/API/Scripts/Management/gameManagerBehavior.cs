@@ -116,17 +116,16 @@ namespace UWBsummercampAPI{
 						switch (myTeamID) {
 
 						case 1:
-							
-							playerCharacter.GetComponent<coreCharacterBehavior> ().changePlayerColor(255f, 0f, 0f);
+							playerCharacter.GetComponent<coreCharacterBehavior> ().changePlayerColor(Color.red.r, Color.red.g, Color.red.b);
 							break;
 						case 2:
-							playerCharacter.GetComponent<coreCharacterBehavior> ().changePlayerColor(186f,85f,211f);
+							playerCharacter.GetComponent<coreCharacterBehavior> ().changePlayerColor(Color.magenta.r, Color.magenta.g, Color.magenta.b);
 							break;
 						case 3:
-							playerCharacter.GetComponent<coreCharacterBehavior> ().changePlayerColor(0f, 0f, 255f);
+							playerCharacter.GetComponent<coreCharacterBehavior> ().changePlayerColor(Color.blue.r, Color.blue.g, Color.blue.b);
 							break;
 						case 4:
-							playerCharacter.GetComponent<coreCharacterBehavior> ().changePlayerColor(0, 255f, 255f);
+							playerCharacter.GetComponent<coreCharacterBehavior> ().changePlayerColor(Color.yellow.r, Color.yellow.g, Color.yellow.b);
 							break;
 
 						}
@@ -189,6 +188,20 @@ namespace UWBsummercampAPI{
 
 						UWBPhoton.gameObject.GetComponent<PhotonView> ().RPC ("RequestColorRPC", PhotonTargets.MasterClient); 
 					}
+
+
+
+						coreCharacterBehavior[] listOfexistingCharacters = GameObject.FindObjectsOfType<coreCharacterBehavior> ();
+
+						foreach (coreCharacterBehavior existingCharacter in listOfexistingCharacters) {
+							existingCharacter.gameObject.GetComponent<PhotonView> ().RPC ("updatePlayerText", PhotonTargets.MasterClient);
+						}
+
+
+
+
+
+
 
 
 					switch (NetworkManager.getDevice ()) {
@@ -333,9 +346,9 @@ namespace UWBsummercampAPI{
 				} else {
 					//lose game here... dont work in external function.
 					gameFinished = true;
-					playerCharacter.GetComponentInChildren<CanvasManager> ().refreshDashboard ("YouLose!");
+					mainCanvas.loseScreen ("The Game is Over!!! \n Team "+_teamID.ToString()+" WON!!!");
 					playerCharacter.GetComponent<Renderer>().enabled = false;
-					playerCharacter.SetActive (false);
+					//playerCharacter.SetActive (false);
 
 				}
 			}
@@ -347,13 +360,13 @@ namespace UWBsummercampAPI{
 				return;
 			
 			gameFinished = true;
-			playerCharacter.GetComponentInChildren<CanvasManager> ().refreshDashboard ("YouLose!");
-			playerCharacter.SetActive (false);
+			mainCanvas.loseScreen ("The Game is Over!!!");
+
 		}
 
 
 		public void congratulate(){
-			playerCharacter.GetComponentInChildren<CanvasManager> ().refreshDashboard ("COngrats!!");
+			mainCanvas.winScreen("CONGRATULATIONS!!! \n Team "+myTeamID+" WINS!!!");
 
 
 		}

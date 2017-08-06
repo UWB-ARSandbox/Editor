@@ -651,7 +651,12 @@ public class coreCharacterBehavior : MonoBehaviour
     #endregion
 
     #region Display Text
-    public void setText(string text)
+	[PunRPC]
+		public void updatePlayerText(){
+			setText (getPlayerName ());
+		}
+
+		public void setText(string text)
     {
         if (pV != null)
         {
@@ -665,6 +670,10 @@ public class coreCharacterBehavior : MonoBehaviour
         }
     }
 
+		public string getPlayerName(){
+
+			return playerName;
+		}
 
 
     #endregion

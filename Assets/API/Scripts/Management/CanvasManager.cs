@@ -28,7 +28,22 @@ public class CanvasManager : MonoBehaviour {
 		
 	}
 
+		public void loseScreen(string loseText){
 
+			gameOver.SetActive (true);
+			dashboard.SetActive (false);
+			gameOverText.text = loseText;
+
+		}
+
+		public void winScreen(string winText){
+
+			gameOver.SetActive (true);
+			dashboard.SetActive (false);
+			gameOverText.text = winText;
+
+
+		}
 
 		public void refreshDashboard(string dashMsg){
 			dashboard.gameObject.SetActive (true);
