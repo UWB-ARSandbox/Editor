@@ -209,10 +209,11 @@ namespace UWBsummercampAPI{
 						print ("VR was choosed!!");
 
 					//spawnLocation = GameObject.Find ("Camera").transform.position;
-						spawningRotation = GameObject.Find ("Camera").transform.rotation;
+							spawningRotation = new Quaternion (0f,0f,0f,0f);
 						GameObject.Destroy (GameObject.Find ("Camera"));
 
-						GameObject CameraRig = Instantiate (Resources.Load ("[CameraRig]"), spawnLocation, spawningRotation) as GameObject;
+						GameObject CameraRig = Instantiate  (Resources.Load ("[CameraRig]"), spawnLocation, spawningRotation) as GameObject;
+						
 						GameObject ViveAvatar = Instantiate (Resources.Load ("ViveAvatar"), spawnLocation, spawningRotation) as GameObject;
 						spawnLocation = new Vector3 (spawnLocation.x + 2f, spawnLocation.y, spawnLocation.z);
 
@@ -348,6 +349,8 @@ namespace UWBsummercampAPI{
 					gameFinished = true;
 					mainCanvas.loseScreen ("The Game is Over!!! \n Team "+_teamID.ToString()+" WON!!!");
 					playerCharacter.GetComponent<Renderer>().enabled = false;
+
+
 					//playerCharacter.SetActive (false);
 
 				}
