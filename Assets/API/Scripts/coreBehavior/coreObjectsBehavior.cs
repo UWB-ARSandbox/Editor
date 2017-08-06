@@ -472,6 +472,21 @@ public class coreObjectsBehavior : MonoBehaviour
 
     }
 
+		protected int checkPoints()
+		{
+
+			if (iteractionObj == null)
+			{
+				Debug.LogWarning("Cannot check points: No player has been set yet!");
+				return false;
+			}
+			else
+			{
+				return iteractionObj.GetComponent<coreCharacterBehavior>().getPlayerPoints();
+			}
+
+		}
+
     protected bool winGame()
     {
         if (iteractionObj == null)

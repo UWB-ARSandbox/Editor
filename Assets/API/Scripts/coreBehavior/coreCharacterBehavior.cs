@@ -531,6 +531,10 @@ public class coreCharacterBehavior : MonoBehaviour
 					GameManager.addPoints(-pointsTMP, teamID);
     }
 
+	public int getPlayerPoints(){
+			GameManager.checkPoints (teamID);
+	}
+
     protected void setGoal(int goalPointsTMP)
     {
 					GameManager.setGoal(goalPointsTMP);
