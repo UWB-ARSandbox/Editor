@@ -249,7 +249,7 @@ public class CreationWindow : EditorWindow
 
 		for (int i = 0; i < info.Length; i++)
 		{
-			customScriptNames[i+1] = info[i].Name.Trim('.','c','s');
+			customScriptNames[i+1] = info[i].Name.Substring(0, info[i].Name.Length -3) ;
 		
 		}
 
