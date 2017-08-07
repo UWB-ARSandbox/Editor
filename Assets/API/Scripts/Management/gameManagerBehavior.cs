@@ -223,7 +223,17 @@ namespace UWBsummercampAPI{
 
 						break;
 					case "Tango":
-						print ("Tango Tango Tango!!!");
+						spawningRotation = new Quaternion (0f,0f,0f,0f);
+						GameObject.Destroy (GameObject.Find ("Camera"));
+
+						GameObject tangoCamera = Instantiate  (Resources.Load ("TangoCamera"), spawnLocation, spawningRotation) as GameObject;
+
+						GameObject tangoManager = Instantiate (Resources.Load ("TangoManager"), spawnLocation, spawningRotation) as GameObject;
+						spawnLocation = new Vector3 (spawnLocation.x + 2f, spawnLocation.y, spawnLocation.z);
+
+						playerCharacter = PhotonNetwork.Instantiate ("DefaultPlayerCharacter", spawnLocation, spawningRotation, 0);
+						updatePlayer = true;
+
 						break;
 					default:
 						print ("Normal PC Stuff");
