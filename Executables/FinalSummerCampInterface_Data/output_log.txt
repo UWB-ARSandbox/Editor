@@ -25,7 +25,7 @@ Platform assembly: C:\Users\arrid\Documents\Editor\Executables\FinalSummerCampIn
 Loading C:\Users\arrid\Documents\Editor\Executables\FinalSummerCampInterface_Data\Managed\UnityEngine.VR.dll into Unity Child Domain
 Platform assembly: C:\Users\arrid\Documents\Editor\Executables\FinalSummerCampInterface_Data\Managed\Photon3Unity3D.dll (this message is harmless)
 Loading C:\Users\arrid\Documents\Editor\Executables\FinalSummerCampInterface_Data\Managed\Photon3Unity3D.dll into Unity Child Domain
-- Completed reload, in  0.032 seconds
+- Completed reload, in  0.018 seconds
 Platform assembly: C:\Users\arrid\Documents\Editor\Executables\FinalSummerCampInterface_Data\Managed\System.Core.dll (this message is harmless)
 Platform assembly: C:\Users\arrid\Documents\Editor\Executables\FinalSummerCampInterface_Data\Managed\System.dll (this message is harmless)
 <RI> Initializing input.
@@ -40,71 +40,23 @@ VR: OpenVR Error! OpenVR failed initialization with error code VRInitError_Init_
  
 (Filename:  Line: 954)
 
-UnloadTime: 1.275159 ms
+UnloadTime: 1.464421 ms
 Setting up 2 worker threads for Enlighten.
-  Thread -> id: 458c -> priority: 1 
-  Thread -> id: 1f94 -> priority: 1 
+  Thread -> id: 3de0 -> priority: 1 
+  Thread -> id: 4738 -> priority: 1 
 OnConnectedToMaster() was called by PUN
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-room changed to: te
+room changed to: aaa
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
 Unloading 6 Unused Serialized files (Serialized files now loaded: 0)
-UnloadTime: 2.985498 ms
+UnloadTime: 3.566422 ms
 
 Unloading 17 unused Assets to reduce memory usage. Loaded Objects now: 551.
-Total: 0.266445 ms (FindLiveObjects: 0.041465 ms CreateObjectMapping: 0.014369 ms MarkObjects: 0.197473 ms  DeleteObjects: 0.013137 ms)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+Total: 0.294772 ms (FindLiveObjects: 0.049265 ms CreateObjectMapping: 0.022990 ms MarkObjects: 0.208147 ms  DeleteObjects: 0.013958 ms)
 
 addpoints to 1
  
@@ -194,59 +146,7 @@ Normal PC Stuff
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
 RPC [ChangeColor] called on object with no Renderer
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-QueueIncomingReliableWarning. This client buffers many incoming messages. This is OK temporarily. With lots of these warnings, check if you send too much or execute messages too slow. 
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-addpoints to 1
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-addpoints to 1
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-addpoints to 1
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-addpoints to 1
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-addpoints to 1
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
