@@ -14,7 +14,8 @@ public class lobbyManager : PunBehaviour {
 	public Button refreshRoomListButton;
 	public Toggle privateRoomToggle;
 	public InputField roomNameInputField;
-
+	public InputField serverIPInputField;
+	public Toggle customServerToggle;
 
 	private string roomName; 
 	private int teamID;
@@ -22,6 +23,7 @@ public class lobbyManager : PunBehaviour {
 	private string device;
 	private bool privateRoom; 
 	private bool validRoom;
+	private string serverIP;
 
 
 	private string[] teamsList = {"1(Red)", "2(Purple)", "3(Blue)", "4(Yellow)"};
@@ -30,7 +32,7 @@ public class lobbyManager : PunBehaviour {
 	// Use this for initialization
 	void Start () {
 		
-		PhotonNetwork.ConnectToMaster ("172.21.209.145", 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
+		//PhotonNetwork.ConnectToMaster ("172.21.209.145", 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
 		//PhotonNetwork.ConnectToMaster ("10.156.32.153", 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
 		#if (UNITY_ANDROID)
 
@@ -42,9 +44,15 @@ public class lobbyManager : PunBehaviour {
 		//Setup Interface
 
 		//Setup Rooms
-		privateRoom = false;
+		privateRoom = false; //this variable seems useless and should be revised to remove
 		privateRoomToggle.isOn = false;
-		refreshRoomList();
+
+		customServerToggle.isOn = false;
+		serverIPInputField.text = "172.21.209.145";
+		serverIP = "172.21.209.145";
+		serverIPInputField.interactable = false;
+
+		//refreshRoomList();
 
 
 		//Set Listners
@@ -53,6 +61,9 @@ public class lobbyManager : PunBehaviour {
 		privateRoomToggle.onValueChanged.AddListener (manageRoomPrivacy);
 		roomNameInputField.onValueChanged.AddListener(checkRoomName);
 		dropdownRoom.onValueChanged.AddListener (updateRoomNameDrop);
+		serverIPInputField.onValueChanged.AddListener(updateServerIP);
+		customServerToggle.onValueChanged.AddListener (manageCustomServer);
+
 
 		//Setup Teams
 		dropdownTeam.options.Clear ();
@@ -108,6 +119,15 @@ public class lobbyManager : PunBehaviour {
 
 	private void refreshRoomList(){
 
+
+
+		if (PhotonNetwork.connected) {
+
+			PhotonNetwork.Disconnect ();
+		}
+		PhotonNetwork.ConnectToMaster (serverIP, 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
+
+
 		RoomInfo[] roomList = PhotonNetwork.GetRoomList ();
 
 
@@ -124,6 +144,8 @@ public class lobbyManager : PunBehaviour {
 		}
 		dropdownRoom.RefreshShownValue ();
 
+
+
 	}
 
 
@@ -138,7 +160,11 @@ public class lobbyManager : PunBehaviour {
 	}
 
 
+	private void updateServerIP(string tmpRoomName){
+		Debug.Log ("IP value changed");
+		serverIP = tmpRoomName;
 
+	}
 
 	private void checkRoomName(string tmpRoomName){
 		//need to do a beter validatiom!!! like the following
@@ -174,6 +200,25 @@ public class lobbyManager : PunBehaviour {
 		}
 
 
+
+	private void manageCustomServer(bool customServer)
+	{
+
+		if (customServer) {
+			serverIPInputField.text = "";
+			serverIP = "localhost";
+			serverIPInputField.interactable = true;
+			return;
+
+		}
+
+		serverIPInputField.text = "172.21.209.145";
+		serverIPInputField.interactable = false;
+
+
+	}
+
+
 	private void manageRoomPrivacy(bool privateRoom)
 	{
 
@@ -204,7 +249,7 @@ public class lobbyManager : PunBehaviour {
 		SceneBuffer sceneBuffer = SceneBufferOBJ.AddComponent<SceneBuffer> ();
 
 
-		sceneBuffer.updateBuffer (roomName, teamID, playerName, device);
+		sceneBuffer.updateBuffer (roomName, teamID, playerName, device, serverIP);
 		Object.DontDestroyOnLoad (SceneBufferOBJ);
 
 		Application.LoadLevel ("TemplateScene");

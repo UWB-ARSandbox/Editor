@@ -346,7 +346,7 @@ namespace UWBsummercampAPI{
 		}
 
 		[PunRPC]
-		public void gameOverRPC(int _teamID)
+		public void gameOverRPC(int _teamID = 0)
 		{
 			if (!gameFinished)
 			{
@@ -354,14 +354,17 @@ namespace UWBsummercampAPI{
 
 				if (_teamID == myTeamID) {
 					congratulate ();
-				} else {
+				} else if (_teamID != 0) {
 					//lose game here... dont work in external function.
 					gameFinished = true;
-					mainCanvas.loseScreen ("The Game is Over!!! \n Team "+_teamID.ToString()+" WON!!!");
-					playerCharacter.GetComponent<Renderer>().enabled = false;
+					mainCanvas.loseScreen ("The Game is Over!!! \n Team " + _teamID.ToString () + " WON!!!");
+					playerCharacter.GetComponent<Renderer> ().enabled = false;
 
 
 					//playerCharacter.SetActive (false);
+
+				} else {
+					mainCanvas.loseScreen ("The Game is Over!!!");
 
 				}
 			}
@@ -371,7 +374,23 @@ namespace UWBsummercampAPI{
 		{
 			if (gameFinished)
 				return;
-			
+
+
+			if (pV != null  && NetworkManager.isInRoom() )
+			{
+				// This file PunRPC
+				pV.RPC("gameOverRPC", PhotonTargets.All, (int) 0); // *
+			}
+			else
+			{
+				// Make this character win
+				gameOverRPC( (int) 0);
+			}
+
+
+
+
+
 			gameFinished = true;
 			mainCanvas.loseScreen ("The Game is Over!!!");
 

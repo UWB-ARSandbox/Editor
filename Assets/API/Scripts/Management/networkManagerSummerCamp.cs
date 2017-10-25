@@ -17,6 +17,7 @@ public class networkManagerSummerCamp : PunBehaviour {
 	private SceneBuffer sceneBuffer;
 	private string playerName;
 	private string device = "Workstation";
+	private string serverIP = "172.21.209.145";
 	private gameManagerBehavior GameManager;
 
 
@@ -58,13 +59,14 @@ public class networkManagerSummerCamp : PunBehaviour {
 			teamID = int.Parse(bufferTMP[1]);
 			playerName = bufferTMP [2];
 			device = bufferTMP [3];
+			serverIP = bufferTMP [4];
 			HostGame = false;
 
 
 		} 
 
 		if (!PhotonNetwork.connected) {
-			PhotonNetwork.ConnectToMaster ("172.21.209.145", 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
+			PhotonNetwork.ConnectToMaster (serverIP, 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
 
 //			PhotonNetwork.ConnectToMaster ("10.156.32.153", 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1");
 		}
@@ -131,7 +133,7 @@ public class networkManagerSummerCamp : PunBehaviour {
 		
 
 			if (PhotonNetwork.connectionState.ToString () == "Disconnected") {
-				PhotonNetwork.ConnectToMaster ("172.21.209.145", 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
+			PhotonNetwork.ConnectToMaster (serverIP, 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
 			//PhotonNetwork.ConnectToMaster ("10.156.32.153", 4530, "6bb09fb9-6bbc-4a7d-a181-44797df0c001", "1"); 
 			}		
 

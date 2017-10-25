@@ -67,6 +67,7 @@
 			/// </summary>
 			void Start()
 			{
+			cameraTransform = GameObject.Find("Camera").transform;
 				// Start following the target if wanted.
 				if (followOnStart)
 				{
@@ -82,6 +83,40 @@
 			/// </summary>
 			void LateUpdate()
 			{
+
+
+
+			if (Input.GetKeyDown (KeyCode.A) && centerOffset.x > -10f ) {
+
+				Vector3 newPos = new Vector3 ( (centerOffset.x -1f), centerOffset.y , centerOffset.z);
+				centerOffset = newPos;
+
+
+			} else 	if (Input.GetKeyDown (KeyCode.D) && centerOffset.x < 10f ) {
+
+				Vector3 newPos = new Vector3 ( (centerOffset.x + 1f), centerOffset.y , centerOffset.z);
+				centerOffset = newPos;
+
+
+			} 		else	if (Input.GetKeyDown (KeyCode.S) && centerOffset.z > -10f   ) {
+
+				Vector3 newPos = new Vector3 ( centerOffset.x, centerOffset.y , (centerOffset.z  - 1f ));
+				centerOffset = newPos;
+
+
+
+
+			} else 			if (Input.GetKeyDown (KeyCode.W)  && centerOffset.z < 10f   ) {
+
+				Vector3 newPos = new Vector3 ( centerOffset.x, centerOffset.y , (centerOffset.z  + 1f ));
+				centerOffset = newPos;
+
+			} 
+
+
+
+
+
 				// The transform target may not destroy on level load, 
 				// so we need to cover corner cases where the Main Camera is different everytime we load a new scene, and reconnect when that happens
 				if (cameraTransform == null && isFollowing)
@@ -200,12 +235,18 @@
 
 
 				Vector3 relativeOffset = Vector3.forward * distance + Vector3.down * height;
-				cameraTransform.rotation = yRotation * Quaternion.LookRotation( relativeOffset );
 
+				//cameraTransform.rotation = yRotation * Quaternion.LookRotation( relativeOffset );
+
+			cameraTransform.LookAt(this.transform);
 
 			}
 
 
 			#endregion
 		}
+
+
+
+
 	}
